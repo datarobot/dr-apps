@@ -78,10 +78,9 @@ def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explan
                     'featureValue': getattr(row, f'EXPLANATION_{i}_ACTUAL_VALUE'),
                     'strength': getattr(row, f'EXPLANATION_{i}_STRENGTH'),
                     'qualitativeStrength': getattr(row, f'EXPLANATION_{i}_QUALITATIVE_STRENGTH'),
-                } for i in range(1, max_explanations + 1) if hasattr(row, f'EXPLANATION_{i}_FEATURE_NAME')
+                } for i in range(1, max_explanations + 1) if (hasattr(row, f'EXPLANATION_{i}_FEATURE_NAME') and type(getattr(row, f'EXPLANATION_{i}_FEATURE_NAME')) == str)
             ]
         scored_predictions.append(record)
-
     return {'data': scored_predictions}
 
 
