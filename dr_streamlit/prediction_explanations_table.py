@@ -45,20 +45,24 @@ def prediction_explanation_table(
     feature_values = []
     charts = []
     for row in pex.itertuples():
-        if hasattr(row, 'perNgramTextExplanations'):
-            feature_values.append(color_in_features(row.featureValue, row.perNgramTextExplanations))
+        if hasattr(row, 'per_ngram_text_explanations'):
+            feature_values.append(color_in_features(row.feature_value, row.per_ngram_text_explanations))
         else:
-            feature_values.append(row.featureValue)
+            feature_values.append(row.feature_value)
 
         if type(row.feature) is not dict:
-            chart = feature_histogram_chart(project_id, row.feature, row.featureValue, bin_limit=bin_limit)
+            chart = feature_histogram_chart(project_id, row.feature, row.feature_value, bin_limit=bin_limit)
             charts.append(
                 "![default](data:image/png;base64," + plotly_to_b64_img(chart, height=height, width=width) + ')')
         else:
             charts.append('')
 
-    table = pd.DataFrame({'Feature': pex['feature'], 'Value': feature_values, 'Strength': qualitative_strength_from_prediction_explanations(pex, project_id=project_id, model_id=model_id),
-                          'Distribution': charts})
+    table = pd.DataFrame({
+        'Feature': pex['feature'],
+        'Value': feature_values,
+        'Strength': qualitative_strength_from_prediction_explanations(pex, project_id=project_id, model_id=model_id),
+        'Distribution': charts
+    })
     st.markdown(table.to_markdown())
 
 
@@ -71,15 +75,15 @@ def color_in_features(text_feature_value: str, per_ngram_text_explanations: List
             all_ngrams.append(
                 {
                     **ngram,
-                    'qualitativeStrength': ngram_text_explanation['qualitativeStrength']
+                    'qualitative_strength': ngram_text_explanation['qualitative_strength']
                 }
             )
-    all_ngrams.sort(key=lambda x: -x['endingIndex'])
+    all_ngrams.sort(key=lambda x: -x['ending_index'])
 
     for ngram in all_ngrams:
-        start = ngram['startingIndex']
-        end = ngram['endingIndex']
-        color_span, close_color_span = PredictionExplanationTableColors.qs_to_span(ngram['qualitativeStrength'])
+        start = ngram['starting_index']
+        end = ngram['ending_index']
+        color_span, close_color_span = PredictionExplanationTableColors.qs_to_span(ngram['qualitative_strength'])
         if color_span:
             text_feature_value = text_feature_value[:start] +\
                                  color_span + text_feature_value[start:end] + close_color_span +\
@@ -101,8 +105,8 @@ def qualitative_strength_from_prediction_explanations(
     :param model_id: model associated with the prediction
     :return:
     """
-    if not pex['qualitativeStrength'].isnull().values.all():
-        return pex['qualitativeStrength']
+    if not pex['qualitative_strength'].isnull().values.all():
+        return pex['qualitative_strength']
 
     features = get_model_features(project_id=project_id, model_id=model_id)
 
