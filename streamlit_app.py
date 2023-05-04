@@ -78,7 +78,7 @@ def predictor_app():
     if pred:
         predicted_class = None  # For Multiclass
         if project.target_type == TARGET_TYPE.BINARY:
-            prediction_values = pred['data'][0]['predictionValues']
+            prediction_values = pred['data'][0]['prediction_values']
             if type(prediction_values[0]) in [tuple, list]:
                 # Some are like this
                 prediction_values = prediction_values[0]
@@ -87,11 +87,11 @@ def predictor_app():
             prediction = pred['data'][0]['prediction']
         elif project.target_type == TARGET_TYPE.MULTICLASS:
             predicted_class = pred['data'][0]['prediction']
-            prediction = next(pv['value'] for pv in pred['data'][0]['predictionValues'] if pv['label'] == predicted_class)
+            prediction = next(pv['value'] for pv in pred['data'][0]['prediction_values'] if pv['label'] == predicted_class)
         else:
             raise ValueError(f'{project.target_type} is not supported')
 
-        pex = pd.DataFrame.from_records(pred['data'][0]['predictionExplanations'])
+        pex = pd.DataFrame.from_records(pred['data'][0]['prediction_explanations'])
         prediction_display_chart(
             project_id=deployment.model['project_id'],
             model_id=deployment.model['id'],

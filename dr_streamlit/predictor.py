@@ -1,4 +1,6 @@
-from typing import List, Dict, Any, Optional, cast
+import json
+import re
+from typing import List, Dict, Any, Optional, cast, Union
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -35,7 +37,7 @@ def submit_prediction(
         },
         headers=headers,
     )
-    return rsp.json()
+    return _camelCase_keys_to_snake_case_keys(rsp.json())
 
 
 def _get_chart_from_model_or_parent(project_id: str, model_id: str, chart: str):
@@ -52,12 +54,25 @@ def _get_chart_from_model_or_parent(project_id: str, model_id: str, chart: str):
     else:
         return roc_curve_rsp_json
 
+
+def _camelCase_keys_to_snake_case_keys(data: Union[Dict[str, Any], List]):
+    """
+    The single and batch prediction API uses camelCase keys, and so we need to be snake_case
+    so that we can have parity with the Batch Prediction API.
+    """
+    if isinstance(data, list):
+        return [_camelCase_keys_to_snake_case_keys(i) if isinstance(i, (dict, list)) else i for i in data]
+
+    return {re.sub(r'(?<!^)(?=[A-Z])', '_', key).lower():_camelCase_keys_to_snake_case_keys(value) if isinstance(value, (dict, list)) else value for key, value in data.items()}
+
+
 @st.cache
 def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explanations: int):
     [_, result] = BatchPredictionJob.score_pandas(
         deployment=deployment,
         df=df,
         max_explanations=max_explanations,
+        max_ngram_explanations=max_explanations,
     )
     project = Project.get(deployment.model['project_id'])
     target = project.target
@@ -65,22 +80,24 @@ def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explan
     for row in result.itertuples():
         record = dict()
         if project.target_type == TARGET_TYPE.BINARY:
-            record['predictionValues'] = [
+            record['prediction_values'] = [
                 {'value': getattr(row, f'{target}_{index}_PREDICTION'), 'label': float(index)} for index in [0, 1]
             ],
         elif project.target_type == TARGET_TYPE.REGRESSION:
             record['prediction'] = getattr(row, f'{target}_PREDICTION')
         else:
             raise ValueError("Target Type not supported")
-        record['predictionExplanations'] = [
+        record['prediction_explanations'] = [
                 {
                     'feature': getattr(row, f'EXPLANATION_{i}_FEATURE_NAME'),
-                    'featureValue': getattr(row, f'EXPLANATION_{i}_ACTUAL_VALUE'),
+                    'feature_value': getattr(row, f'EXPLANATION_{i}_ACTUAL_VALUE'),
                     'strength': getattr(row, f'EXPLANATION_{i}_STRENGTH'),
-                    'qualitativeStrength': getattr(row, f'EXPLANATION_{i}_QUALITATIVE_STRENGTH'),
+                    'qualitative_strength': getattr(row, f'EXPLANATION_{i}_QUALITATIVE_STRENGTH'),
+                    'per_ngram_text_explanations': json.loads(getattr(row, f'EXPLANATION_{i}_TEXT_NGRAMS'))
                 } for i in range(1, max_explanations + 1) if (hasattr(row, f'EXPLANATION_{i}_FEATURE_NAME') and not pd.isna(getattr(row, f'EXPLANATION_{i}_FEATURE_NAME')))
             ]
         scored_predictions.append(record)
+
     return {'data': scored_predictions}
 
 
