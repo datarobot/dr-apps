@@ -59,8 +59,6 @@ def _camelCase_keys_to_snake_case_keys(data: Union[Dict[str, Any], List]):
     """
     The single and batch prediction API uses camelCase keys, and so we need to be snake_case
     so that we can have parity with the Batch Prediction API.
-    :param data:
-    :return:
     """
     if isinstance(data, list):
         return [_camelCase_keys_to_snake_case_keys(i) if isinstance(i, (dict, list)) else i for i in data]
