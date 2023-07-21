@@ -1,13 +1,12 @@
-
 import pandas as pd
 import streamlit as st
 import os
 from datarobot import Client, TARGET_TYPE
 from datarobot.client import set_client
-from .dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_feature_dropdown_menu, \
+from dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_feature_dropdown_menu, \
     project_model_dropdown, wordcloud_chart, get_deployment, get_project, create_prediction_form, \
     prediction_display_chart, experiment_container_overview_widget
-from .dr_streamlit.datarobot_branding import datarobot_logo
+from dr_streamlit.datarobot_branding import datarobot_logo
 
 deployment_id = os.getenv('deploymentid')
 project_id = os.getenv('projectid')
