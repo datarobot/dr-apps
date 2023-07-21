@@ -7,7 +7,7 @@ from datarobot import Model
 from datarobot.errors import ClientError
 from datarobot.models.word_cloud import WordCloud
 
-from dr_streamlit.select_box import AGGREGATED_NAME
+from .select_box import AGGREGATED_NAME
 
 
 def _get_word_cloud_data(project_id, model_id, exclude_stop_words=False) -> WordCloud:

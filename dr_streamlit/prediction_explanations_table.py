@@ -7,8 +7,8 @@ import plotly.io
 import streamlit as st
 from pandas import Series
 
-from dr_streamlit.caches import get_model_features
-from dr_streamlit.feature_histogram import feature_histogram_chart
+from .caches import get_model_features
+from .feature_histogram import feature_histogram_chart
 
 
 class PredictionExplanationTableColors:

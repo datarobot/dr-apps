@@ -3,7 +3,7 @@ from typing import Optional
 import pandas as pd
 from datarobot import Model, Project, TARGET_TYPE
 
-from dr_streamlit.predictor import get_distribution_chart_data
+from .predictor import get_distribution_chart_data
 import plotly.graph_objects as go
 
 

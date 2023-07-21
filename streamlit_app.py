@@ -1,5 +1,3 @@
-import base64
-
 import pandas as pd
 import streamlit as st
 import os
@@ -104,7 +102,7 @@ def predictor_app():
         )
 
 
-if __name__ == '__main__':
+def main():
     try:
         c = Client(
             token=os.getenv("token"),
@@ -140,3 +138,7 @@ if __name__ == '__main__':
         )
         demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
         page_names_to_funcs[demo_name]()
+
+
+if __name__ == '__main__':
+    main()

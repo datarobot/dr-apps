@@ -8,9 +8,9 @@ from altair import Undefined
 from datarobot import TARGET_TYPE
 import plotly.express as px
 
-from dr_streamlit.caches import get_project, get_model, initialize_and_get_feature_impact
-from dr_streamlit.select_box import AGGREGATED_NAME
-from dr_streamlit.wrappers import chart_with_error_backup
+from .caches import get_project, get_model, initialize_and_get_feature_impact
+from .select_box import AGGREGATED_NAME
+from .wrappers import chart_with_error_backup
 
 
 @st.cache
