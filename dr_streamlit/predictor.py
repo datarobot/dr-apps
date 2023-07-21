@@ -7,7 +7,7 @@ import pandas as pd
 from datarobot import Deployment, Project, TARGET_TYPE, BatchPredictionJob
 from datarobot.client import get_client, Client
 
-from dr_streamlit.caches import get_model
+from .caches import get_model
 
 
 @st.cache

@@ -5,7 +5,7 @@ import pandas
 import streamlit as st
 from datarobot import Deployment, FeatureHistogram, Project
 
-from dr_streamlit.predictor import submit_prediction, submit_batch_prediction
+from .predictor import submit_prediction, submit_batch_prediction
 
 
 @st.cache

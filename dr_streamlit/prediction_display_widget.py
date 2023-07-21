@@ -2,8 +2,8 @@ from typing import Optional
 
 import pandas as pd
 
-from dr_streamlit.prediction_distribution import prediction_distribution_chart
-from dr_streamlit.prediction_explanations_table import prediction_explanation_table
+from .prediction_distribution import prediction_distribution_chart
+from .prediction_explanations_table import prediction_explanation_table
 import streamlit as st
 
 

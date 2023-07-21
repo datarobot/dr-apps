@@ -3,7 +3,7 @@ from typing import List, Optional
 import streamlit as st
 from datarobot import Project, TARGET_TYPE
 
-from dr_streamlit.caches import initialize_and_get_feature_impact, get_project
+from .caches import initialize_and_get_feature_impact, get_project
 
 AGGREGATED_NAME = "Aggregated"
 
