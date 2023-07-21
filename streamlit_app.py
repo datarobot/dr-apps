@@ -1,14 +1,13 @@
-import base64
 
 import pandas as pd
 import streamlit as st
 import os
 from datarobot import Client, TARGET_TYPE
 from datarobot.client import set_client
-from dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_feature_dropdown_menu, \
+from .dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_feature_dropdown_menu, \
     project_model_dropdown, wordcloud_chart, get_deployment, get_project, create_prediction_form, \
     prediction_display_chart, experiment_container_overview_widget
-from dr_streamlit.datarobot_branding import datarobot_logo
+from .dr_streamlit.datarobot_branding import datarobot_logo
 
 deployment_id = os.getenv('deploymentid')
 project_id = os.getenv('projectid')
@@ -104,7 +103,7 @@ def predictor_app():
         )
 
 
-if __name__ == '__main__':
+def main():
     try:
         c = Client(
             token=os.getenv("token"),
@@ -140,3 +139,7 @@ if __name__ == '__main__':
         )
         demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
         page_names_to_funcs[demo_name]()
+
+
+if __name__ == '__main__':
+    main()
