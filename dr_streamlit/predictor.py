@@ -81,7 +81,7 @@ def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explan
         record = dict()
         if project.target_type == TARGET_TYPE.BINARY:
             record['prediction_values'] = [
-                {'value': getattr(row, f'{target}_{index}_PREDICTION'), 'label': float(index)} for index in [0, 1]
+                {'value': getattr(row, f'{target}_{project.positive_class}_PREDICTION'), 'label': project.positive_class}
             ],
         elif project.target_type == TARGET_TYPE.REGRESSION:
             record['prediction'] = getattr(row, f'{target}_PREDICTION')

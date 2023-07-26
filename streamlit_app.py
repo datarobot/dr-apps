@@ -80,7 +80,8 @@ def predictor_app():
             if type(prediction_values[0]) in [tuple, list]:
                 # Some are like this
                 prediction_values = prediction_values[0]
-            prediction = next(pred_value['value'] for pred_value in prediction_values if pred_value['label'] == 0.0)
+            # Assign prediction for the positive class label
+            prediction = next(pred_value['value'] for pred_value in prediction_values if pred_value['label'] == project.positive_class)
         elif project.target_type == TARGET_TYPE.REGRESSION:
             prediction = pred['data'][0]['prediction']
         elif project.target_type == TARGET_TYPE.MULTICLASS:
