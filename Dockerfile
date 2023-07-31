@@ -9,12 +9,22 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . .
-
+COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-EXPOSE 80
+COPY . .
 
-HEALTHCHECK CMD curl --fail http://localhost:80/_stcore/health
+ARG port=80
+ENV STREAMLIT_SERVER_PORT ${port}
+EXPOSE ${port}
 
-ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=80", "--server.address=0.0.0.0"]
+HEALTHCHECK CMD curl --fail http://localhost:${STREAMLIT_SERVER_PORT}/_stcore/health
+
+ARG deploymentId
+ARG projectId
+ARG apiToken
+ENV deploymentid=${deploymentId} \
+    projectid=${projectId} \
+    token=${apiToken}
+
+ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
