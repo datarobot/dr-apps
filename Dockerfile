@@ -14,9 +14,17 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-ENV STREAMLIT_SERVER_PORT 80
-EXPOSE 80
+ARG port=80
+ENV STREAMLIT_SERVER_PORT ${port}
+EXPOSE ${port}
 
 HEALTHCHECK CMD curl --fail http://localhost:${STREAMLIT_SERVER_PORT}/_stcore/health
+
+ARG deploymentId
+ARG projectId
+ARG apiToken
+ENV deploymentid=${deploymentId} \
+    projectid=${projectId} \
+    token=${apiToken}
 
 ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
