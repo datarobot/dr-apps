@@ -62,6 +62,11 @@ def create_prediction_form(
                     pred[f['name']] = date.strftime(f['date_format']) if date else ''
                 elif f['feature_type'] == "Boolean":
                     pred[f['name']] = st.selectbox(f['name'], options=[True, False])
+                elif f['feature_type'] == 'Percentage':
+                    pred[f['name']] = st.text_input(
+                        f['name'],
+                        value= f['median'],
+                    )
 
         # Now add a submit button to the form:
         v = st.form_submit_button("Submit")
