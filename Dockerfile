@@ -27,4 +27,4 @@ ENV deploymentid=${deploymentId} \
     projectid=${projectId} \
     token=${apiToken}
 
-ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "streamlit_app.py"]
