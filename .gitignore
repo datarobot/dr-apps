@@ -1,3 +1,6 @@
-.streamlit/secrets.toml
+build/
+dist/
+.eggs/
+*.egg-info/
 # PyCharm/IntelliJ IDE config
 .idea/
