@@ -1,78 +1,98 @@
-# What's Included
-There are two basic Streamlit demos in this app:
+# Custom apps hosting in DataRobot with DRApps
 
-#### insights demo
-This application allows users to submit a single prediction using the realtime DataRobot generated prediction explanations and color-coded n-grams. Some projects, such as SHAP projects, need to use the batch prediction API. 
+DRApps is a simple command line interface (CLI) providing the tools required to 
+host a custom application, such as a Streamlit app, in DataRobot using a DataRobot 
+execution environment. This allows you to run apps without building your own docker 
+image. Custom applications don't provide any storage; however, you can access the 
+full DataRobot API and other services.
 
-#### predictor demo 
-This application allows users to view models in the leaderboard as well as word cloud and feature impact charts. The word cloud also offers a special breakdown for individual text features.
+## Install the DRApps CLI tool
 
-## What's supported
-Currently, the following project types are supported: 
-* Multiclass
-* Regression
-* Binary classification
-* Feature Discovery
+To install the DRApps CLI tool, clone this 
+[dr-streamlit repository](https://github.com/datarobot/dr-streamlit/tree/main) 
+and then install package by running the following command:
 
-Other project types may work, however, they have not been tested.
-The Insights app supports:
-
-* Time Series regression 
-* Cold start
-* Segmented modeling
-* Anomaly detection
-
-The Insights app will generate a word cloud for some models with text. Note that a word cloud is not generated for all models.
-The Predictor app does not support time series projects.
-## Getting Started
-### Create your GitHub repository 
-1. (Optional) While in the `dr-streamlit` repository, click **Fork** at the top of the page and skip to the section **Create a Streamlit app**.
-2. In the `dr-streamlit` repository, click **Code** and select **Download ZIP**.
-3. Navigate to your GitHub repositories and click **New repository**.
-4. Create a repository. Depending on your Streamlit account you may need to make this repository public, but Streamlit allows you to deploy private repositories, assuming you are signed in and the authentication is linked. 
-5. In your new repository, open the **Code** tab.
-6. Click **Add file > Upload files** and either upload the entire ZIP or specific files (from the ZIP downloaded in step 2).
-
-### Create a Streamlit app
-1. Navigate your web browser to https://share.streamlit.io . If you do not have a Streamlit account, sign up for one. 
-2. Click **New App > From existing repo**.
-3. Confirm that your Github and Streamlit accounts are connected. For help, refer to the Streamlit documentation: https://blog.streamlit.io/host-your-streamlit-app-for-free/. Once connected, Streamlit will be able to read in the files in your repo.
-4. In the **Deploy an app** window, populate the following fields:
-* Under **Repository**, enter the name of your new Github repository (from step 4).
-* Under **Branch**, choose **main**.
-* Under **Main File Path**, add the .py file with your Streamlit app code. Alternatively, you can use the default **streamlit_app.py** provided.
-* Click the advanced settings icon (the three dots located in the Manage App menu). The next section describes how to set up your environment. .
-
-### Connecting DataRobot to the app:
-1. In DataRobot, open the appropriate project and click Models to open the Leaderboard. 
-2. Copy the series of numbers and letters that follow projects/ in the URL (e.g., app.datarobot.com/projects/(projectid)/models/(modelid)/blueprint ).
-3. Click **Deployments** at the top of the page, select the deployment you want to use, and copy the ID in the URL (e.g., app.datarobot.com/deployments/(deploymentid)/overview)
-4. In Streamlit, open **Advanced Settings > Secrets > Text box** and enter those values:
-
-```
-projectid = "<insert copied project ID number here>"
-deploymentid = = "<insert copied deployment ID here>"
-```
-Example: 
-```
-projectid = “64496945bb321d719cac6451”
-deploymentid = “64496952bb321d719cac6452”
+``` sh
+python setup.py install
 ```
 
-5. In DataRobot, click your **User icon** in the top right corner and select **Developer tools**. Then, select any of the API keys shown.
-6. In Streamlit, return to the **Secrets** page and enter the token:
-Example:
-```
-projectid = “64496945bb321d719cac6451”
-deploymentid = “64496952bb321d719cac6452”
+## Use the DRApps CLI
 
-token = "644969e2bb321d719cac6455644969e2bb321d719cac6456644969e2bb321"
-```
-7. Once set, hit **Deploy!** and wait for your app to populate. 
+After you install the DRApps CLI tool, you can use the `--help` command to 
+access the following information:
 
-### Running on a Local Computer
-The required dependencies are defined in `requirements.txt`. In your favorite package manager, install the dependencies:
+``` sh
+$ drapps.py --help
+Usage: drapps.py [OPTIONS]
+
+    App that uses local file for create new custom application
+
+Options:
+    -e, --base-env TEXT   Name or ID for execution environment  [required]
+    -p, --path DIRECTORY  Path to folder with files that should be uploaded
+                        [required]
+    -n, --name TEXT       Name for new custom application. Default: CustomApp
+    -t, --token TEXT      Pubic API access token.
+    -E, --endpoint TEXT   Data Robot Public API endpoint
+    --help                Show this message and exit.
+
 ```
-pip install -r requirements.txt.
+
+More detailed descriptions for each argument are provided in the table below:
+
+Argument     | Description
+-------------|-------------
+`--base-env` | Enter the UUID or name of execution environment used as base for your Streamlit app. The execution environment contains the libraries and packages required by your application. You can find list of available environments in the **Custom Model Workshop** on the [**Environments**](https://app.datarobot.com/model-registry/custom-environments) page. <br> For a custom Streamlit application, use `--base-env '[DataRobot] Python 3.9 Streamlit'`.
+`--path`     | Enter the path to a folder used to create the custom application. Files from this folder are uploaded to DataRobot and used to create the custom application image. The custom application is started from this image. <br> To use the current working directory, use `--path .`.
+`--name`     | Enter the name of your custom application. This name is also used to generate the name of the custom application image, adding `Image` suffix. <br> The default value is `CustomApp`.
+`--token`    | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
+`--endpoint` | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
+
+## Deploy an example app
+
+To test this, deploy an example Streamlit app using the following command from 
+the [`dr-streamlit`](https://github.com/datarobot/dr-streamlit/tree/main) directory:
+
+``` sh
+drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
 ```
-Supply the token, project id, or deployment id. These can either be hard set in the code or be environment variables (e.g., `token`, `projectid`, `deploymentid`). The project ID and deployment ID are part of the URL in DataRobot, and developer tokens are located in your Developer tools (https://app.datarobot.com/account/developer-tools). See the *Connecting DataRobot to the app* section for step-by-step instructions.
+
+This example script works as follows:
+
+1. Finds the execution environment through the `/api/v2/executionEnvironments/` 
+endpoint by the name or UUID you provided, verifying if the environment can be 
+used for the custom application and retrieving the ID of the latest environment version.
+
+2. Finds or creates the custom application image through the `/api/v2/customApplicationImages/` 
+endpoint, named by adding the `Image` suffix to the provided application name (i.e., `CustomApp Image`).
+
+3. Creates a new version of a custom application image through the `customApplicationImages/<appImageId>/versions` 
+endpoint, uploading all files from the directory you provided and setting the execution 
+environment version defined in the first step.
+
+4. Starts a new application with the custom application image version created 
+in the previous step.
+
+When this script runs successfully, `Custom application successfully created` appears 
+in the terminal. You can access the application on the DataRobot 
+Applications tab [Non EU DataRobot](https://app.datarobot.com/applications) [EU DataRobot](https://app.eu.datarobot.com/applications).
+
+> [!IMPORTANT]
+> To access the application, you must be logged into the DataRobot instance and 
+> account associated with the application.
+
+## Considerations
+
+Consider the following when creating a custom app:
+
+* The root directory of the custom application must contain a `start-app.sh` file, 
+used as the entry point for starting your application server.
+
+* The web server of the application must listen on port `8080`.
+
+* The required packages must be listed in a `requirements.txt` file in the application's 
+root directory for automatic installation during application setup.
+
+* The application should authenticate with the DataRobot API through the `DATAROBOT_API_TOKEN`  environment variable with a key found under `Developer Tools` on the DataRobot UI. The DataRobot package on PyPi already authenticates this way. This environment variable will automatically be added to your running container by the custom apps service.
+
+* The application should access the DataRobot Public API URL for the current environment through the `DATAROBOT_ENDPOINT` environment variable. The DataRobot package on PyPi already uses this route. This environment variable will automatically be added to your running container by the custom apps service
