@@ -75,7 +75,7 @@ in the previous step.
 
 When this script runs successfully, `Custom application successfully created` appears 
 in the terminal. You can access the application on the DataRobot 
-[**Applications**](https://app.datarobot.com/applications) tab.
+Applications tab [Non EU DataRobot](https://app.datarobot.com/applications) [EU DataRobot](https://app.eu.datarobot.com/applications).
 
 > [!IMPORTANT]
 > To access the application, you must be logged into the DataRobot instance and 
@@ -90,11 +90,9 @@ used as the entry point for starting your application server.
 
 * The web server of the application must listen on port `8080`.
 
-* The required packages can be listed in a `requirements.txt` file in the application's 
+* The required packages must be listed in a `requirements.txt` file in the application's 
 root directory for automatic installation during application setup.
 
-* The application can access the DataRobot API key through the `DATAROBOT_API_TOKEN`
- environment variable.
+* The application should authenticate with the DataRobot API through the `DATAROBOT_API_TOKEN`  environment variable with a key found under `Developer Tools` on the DataRobot UI. The DataRobot package on PyPi already authenticates this way. This environment variable will automatically be added to your running container by the custom apps service.
 
-* The application can access the DataRobot Public API URL for the current environment 
-through the `DATAROBOT_ENDPOINT` environment variable.
+* The application should access the DataRobot Public API URL for the current environment through the `DATAROBOT_ENDPOINT` environment variable. The DataRobot package on PyPi already uses this route. This environment variable will automatically be added to your running container by the custom apps service
