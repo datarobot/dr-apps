@@ -8,12 +8,12 @@ full DataRobot API and other services.
 
 ## Install the DRApps CLI tool
 
-To install the DRApps CLI tool, clone this directory (`./drapps`) from the 
-[datarobot-user-models (DRUM) repository](https://github.com/datarobot/datarobot-user-models/tree/master) 
-and then install the Python requirements by running the following command:
+To install the DRApps CLI tool, clone this 
+[dr-streamlit repository](https://github.com/datarobot/dr-streamlit/tree/main) 
+and then install package by running the following command:
 
 ``` sh
-pip install -r requirements.txt
+python setup.py install
 ```
 
 ## Use the DRApps CLI
@@ -22,7 +22,7 @@ After you install the DRApps CLI tool, you can use the `--help` command to
 access the following information:
 
 ``` sh
-$ ./drapps.py --help
+$ drapps.py --help
 Usage: drapps.py [OPTIONS]
 
     App that uses local file for create new custom application
@@ -51,10 +51,10 @@ Argument     | Description
 ## Deploy an example app
 
 To test this, deploy an example Streamlit app using the following command from 
-the [`./drapps`](https://github.com/datarobot/datarobot-user-models/tree/master/drapps) directory:
+the [`dr-streamlit`](https://github.com/datarobot/dr-streamlit/tree/main) directory:
 
 ``` sh
-./drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
+drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
 ```
 
 This example script works as follows:
