@@ -30,7 +30,7 @@ def find_base_env_by_name(session, endpoint, base_env_name):
         if env["name"] == base_env_name:
             return env
 
-    msg = f"Can't find environment with name {base_env_name}"
+    msg = f"Can't find environment with name {base_env_name}."
     raise Exception(msg)
 
 
@@ -49,11 +49,11 @@ def get_base_env_last_version(session, endpoint, base_env):
 
     use_cases = env.get("useCases", [])
     if "customApplication" not in use_cases:
-        msg = f"Environment {base_env} can't be used for custom application"
+        msg = f"Environment {base_env} can't be used for custom application."
         raise Exception(msg)
 
     if not env.get("latestVersion"):
-        msg = f"Can't find last version for environment {base_env}"
+        msg = f"Can't find last version for environment {base_env}."
         raise Exception(msg)
 
     return env["latestVersion"]["id"]
@@ -123,7 +123,7 @@ def prepare_token(parameter_token):
     token = os.environ.get("DATAROBOT_API_TOKEN")
     if not token:
         raise ValueError(
-            "You need to set DR API token through parameters or DATAROBOT_API_TOKEN env variable"
+            "You need to set DR API token through parameters or DATAROBOT_API_TOKEN env variable."
         )
     return token
 
@@ -137,16 +137,28 @@ def prepare_endpoint(parameter_endpoint):
     return os.environ.get("DATAROBOT_ENDPOINT", posixpath.join(dr_host, "api/v2"))
 
 
+def check_project(file_folder):
+    # check that entry point script is presented
+    entry_point = next(Path(file_folder).glob('start-app.sh'), None)
+    if not entry_point:
+        raise ValueError("You need to have entrypoint script (start-app.sh) as part of your project.")
+
+
+def prepare_project_path(parameter_path):
+    project_folder = parameter_path or os.getcwd()
+    check_project(project_folder)
+    return project_folder
+
+
 @click.command()
 @click.option(
-    "-e", "--base-env", required=True, type=str, help="Name or ID for execution environment"
+    "-e", "--base-env", required=True, type=str, help="Name or ID for execution environment."
 )
 @click.option(
     "-p",
     "--path",
-    required=True,
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
-    help="Path to folder with files that should be uploaded",
+    help="Path to folder with files that should be uploaded. Default: current folder",
 )
 @click.option(
     "-n",
@@ -156,12 +168,13 @@ def prepare_endpoint(parameter_endpoint):
     help="Name for new custom application. Default: CustomApp",
 )
 @click.option("-t", "--token", type=str, help="Pubic API access token.")
-@click.option("-E", "--endpoint", type=str, help="Data Robot Public API endpoint")
+@click.option("-E", "--endpoint", type=str, help="Data Robot Public API endpoint.")
 def upload(token, base_env, path, name, endpoint):
     """App that uses local file for create new custom application"""
 
     token = prepare_token(token)
     endpoint = prepare_endpoint(endpoint)
+    path = prepare_project_path(path)
 
     session = requests.Session()
     session.headers.update({"Authorization": f"Bearer {token}"})
