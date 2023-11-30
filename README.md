@@ -9,8 +9,7 @@ full DataRobot API and other services.
 ## Install the DRApps CLI tool
 
 To install the DRApps CLI tool, clone this 
-[dr-streamlit repository](https://github.com/datarobot/dr-streamlit/tree/main) 
-and then install package by running the following command:
+respository and then install package by running the following command:
 
 ``` sh
 python setup.py install
@@ -51,7 +50,7 @@ Argument     | Description
 ## Deploy an example app
 
 To test this, deploy an example Streamlit app using the following command from 
-the [`dr-streamlit`](https://github.com/datarobot/dr-streamlit/tree/main) directory:
+the root directory of this repo:
 
 ``` sh
 drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
