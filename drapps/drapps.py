@@ -139,9 +139,14 @@ def prepare_endpoint(parameter_endpoint):
 
 def check_project(file_folder):
     # check that entry point script is presented
-    entry_point = next(Path(file_folder).glob('start-app.sh'), None)
+    entry_point = next(Path(file_folder).glob("start-app.sh"), None)
     if not entry_point:
         raise ValueError("You need to have entrypoint script (start-app.sh) as part of your project.")
+    # check that start-app.sh has correct signature
+    with open(entry_point, "r") as f:
+        data = f.read(3)
+        if data != "#!/":
+            raise ValueError("Please, use correct script signature in entrypoint script (start-app.sh). Eg: `#!/usr/bin/env bash`")
 
 
 def prepare_project_path(parameter_path):
@@ -175,6 +180,7 @@ def upload(token, base_env, path, name, endpoint):
     token = prepare_token(token)
     endpoint = prepare_endpoint(endpoint)
     path = prepare_project_path(path)
+    exit(1)
 
     session = requests.Session()
     session.headers.update({"Authorization": f"Bearer {token}"})
