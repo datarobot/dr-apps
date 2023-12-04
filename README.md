@@ -8,6 +8,14 @@ full DataRobot API and other services.
 
 ## Install the DRApps CLI tool
 
+### For users
+
+``` sh
+pip install git+https://github.com/datarobot/dr-apps
+```
+
+### For contributors
+
 To install the DRApps CLI tool, clone this 
 respository and then install package by running the following command:
 
@@ -27,12 +35,12 @@ Usage: drapps.py [OPTIONS]
     App that uses local file for create new custom application
 
 Options:
-    -e, --base-env TEXT   Name or ID for execution environment  [required]
-    -p, --path DIRECTORY  Path to folder with files that should be uploaded
-                        [required]
+    -e, --base-env TEXT   Name or ID for execution environment.  [required]
+    -p, --path DIRECTORY  Path to folder with files that should be uploaded.
+                          Default: current folder
     -n, --name TEXT       Name for new custom application. Default: CustomApp
     -t, --token TEXT      Pubic API access token.
-    -E, --endpoint TEXT   Data Robot Public API endpoint
+    -E, --endpoint TEXT   Data Robot Public API endpoint.
     --help                Show this message and exit.
 
 ```

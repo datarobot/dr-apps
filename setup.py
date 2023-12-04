@@ -17,7 +17,7 @@ setup(
     long_description=open(path.join(path.dirname(__file__), 'README.md')).read(),
     author='Data Robot',
     url='https://github.com/datarobot/{}'.format(REPO_NAME),
-    version='0.1.0',
+    version='0.1.1',
     packages=find_packages(include=[NAME]),
     package_dir={NAME: NAME},
     python_requires='>=3.7',
