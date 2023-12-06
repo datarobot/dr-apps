@@ -2,5 +2,6 @@ build/
 dist/
 .eggs/
 *.egg-info/
+__pycache__
 # PyCharm/IntelliJ IDE config
 .idea/

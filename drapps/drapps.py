@@ -14,7 +14,7 @@ import click
 import requests
 from bson import ObjectId
 
-from drapps.helpers.win_to_unix_fixes import file_reader_fix_new_lines
+from helpers.win_to_unix_fixes import file_reader_fix_new_lines
 
 ENTRYPOINT_SCRIPT_NAME = "start-app.sh"
 
@@ -193,7 +193,6 @@ def upload(token, base_env, path, name, endpoint):
     token = prepare_token(token)
     endpoint = prepare_endpoint(endpoint)
     path = prepare_project_path(path)
-    exit(1)
 
     session = requests.Session()
     session.headers.update({"Authorization": f"Bearer {token}"})
