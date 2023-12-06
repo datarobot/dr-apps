@@ -80,7 +80,10 @@ def form_files_data(file_folder):
     for file in files_in_folder:
         data["file"].append(open(file, "rb"))
         relative_path = str(file.relative_to(file_folder))
-        data["filePath"].append(os.path.normpath(relative_path))  # normpath is used to convert Windows to UNIX path
+        if os.path.sep == '\\':
+            # if we work on Windows, convert relative path to UNIX way
+            relative_path = relative_path.replace('\\', '/')
+        data["filePath"].append(relative_path)
     return data
 
 
