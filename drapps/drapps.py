@@ -79,7 +79,8 @@ def form_files_data(file_folder):
     data = {"file": [], "filePath": []}
     for file in files_in_folder:
         data["file"].append(open(file, "rb"))
-        data["filePath"].append(str(file.relative_to(file_folder)))
+        relative_path = str(file.relative_to(file_folder))
+        data["filePath"].append(os.path.normpath(relative_path))  # normpath is used to convert Windows to UNIX path
     return data
 
 
