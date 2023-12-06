@@ -14,6 +14,10 @@ import click
 import requests
 from bson import ObjectId
 
+from drapps.helpers.win_to_unix_fixes import file_reader_fix_new_lines
+
+ENTRYPOINT_SCRIPT_NAME = "start-app.sh"
+
 
 def check_response_code(response):
     if response.status_code // 100 != 2:
@@ -78,12 +82,17 @@ def form_files_data(file_folder):
     files_in_folder = [file for file in Path(file_folder).rglob("*") if file.is_file()]
     data = {"file": [], "filePath": []}
     for file in files_in_folder:
-        data["file"].append(open(file, "rb"))
         relative_path = str(file.relative_to(file_folder))
         if os.path.sep == '\\':
             # if we work on Windows, convert relative path to UNIX way
             relative_path = relative_path.replace('\\', '/')
         data["filePath"].append(relative_path)
+
+        if relative_path == ENTRYPOINT_SCRIPT_NAME and os.path.sep == '\\':
+            # fixing new lines in Windows edited file
+            data["file"].append(file_reader_fix_new_lines(file))
+        else:
+            data["file"].append(open(file, "rb"))
     return data
 
 
@@ -143,14 +152,14 @@ def prepare_endpoint(parameter_endpoint):
 
 def check_project(file_folder):
     # check that entry point script is presented
-    entry_point = next(Path(file_folder).glob("start-app.sh"), None)
+    entry_point = next(Path(file_folder).glob(ENTRYPOINT_SCRIPT_NAME), None)
     if not entry_point:
-        raise ValueError("You need to have entrypoint script (start-app.sh) as part of your project.")
+        raise ValueError(f"You need to have entrypoint script ({ENTRYPOINT_SCRIPT_NAME}) as part of your project.")
     # check that start-app.sh has correct signature
     with open(entry_point, "r") as f:
         data = f.read(3)
         if data != "#!/":
-            raise ValueError("Please, use correct script signature in entrypoint script (start-app.sh). Eg: `#!/usr/bin/env bash`")
+            raise ValueError(f"Please, use correct script signature in entrypoint script ({ENTRYPOINT_SCRIPT_NAME}). Eg: `#!/usr/bin/env bash`")
 
 
 def prepare_project_path(parameter_path):
