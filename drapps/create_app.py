@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 #  Copyright 2023 DataRobot, Inc. and its affiliates.
 #
@@ -14,7 +13,7 @@ import click
 import requests
 from bson import ObjectId
 
-from helpers.win_to_unix_fixes import file_reader_fix_new_lines
+from drapps.helpers.win_to_unix_fixes import file_reader_fix_new_lines
 
 ENTRYPOINT_SCRIPT_NAME = "start-app.sh"
 
@@ -167,7 +166,6 @@ def prepare_project_path(parameter_path):
     check_project(project_folder)
     return project_folder
 
-
 @click.command()
 @click.option(
     "-e", "--base-env", required=True, type=str, help="Name or ID for execution environment."
@@ -187,7 +185,7 @@ def prepare_project_path(parameter_path):
 )
 @click.option("-t", "--token", type=str, help="Pubic API access token.")
 @click.option("-E", "--endpoint", type=str, help="Data Robot Public API endpoint.")
-def upload(token, base_env, path, name, endpoint):
+def create(token, base_env, path, name, endpoint):
     """App that uses local file for create new custom application"""
 
     token = prepare_token(token)
@@ -211,7 +209,3 @@ def upload(token, base_env, path, name, endpoint):
     click.echo(f"Starting new application version: {app_id}")
 
     click.echo("Custom application successfully created")
-
-
-if __name__ == "__main__":
-    upload()

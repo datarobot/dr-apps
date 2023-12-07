@@ -29,7 +29,7 @@ After you install the DRApps CLI tool, you can use the `--help` command to
 access the following information:
 
 ``` sh
-$ drapps.py --help
+$ drapps --help
 Usage: drapps.py [OPTIONS]
 
     App that uses local file for create new custom application
