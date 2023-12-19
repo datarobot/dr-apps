@@ -153,18 +153,25 @@ def check_project(file_folder):
     # check that entry point script is presented
     entry_point = next(Path(file_folder).glob(ENTRYPOINT_SCRIPT_NAME), None)
     if not entry_point:
-        raise ValueError(f"You need to have entrypoint script ({ENTRYPOINT_SCRIPT_NAME}) as part of your project.")
+        raise ValueError(
+            f"You need to have entrypoint script ({ENTRYPOINT_SCRIPT_NAME}) "
+            "as part of your project."
+        )
     # check that start-app.sh has correct signature
     with open(entry_point, "r") as f:
         data = f.read(3)
         if data != "#!/":
-            raise ValueError(f"Please, use correct script signature in entrypoint script ({ENTRYPOINT_SCRIPT_NAME}). Eg: `#!/usr/bin/env bash`")
+            raise ValueError(
+                "Please, use correct script signature in entrypoint script "
+                f"({ENTRYPOINT_SCRIPT_NAME}). Eg: `#!/usr/bin/env bash`"
+            )
 
 
 def prepare_project_path(parameter_path):
     project_folder = parameter_path or os.getcwd()
     check_project(project_folder)
     return project_folder
+
 
 @click.command()
 @click.option(
