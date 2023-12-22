@@ -61,7 +61,7 @@ To test this, deploy an example Streamlit app using the following command from
 the root directory of this repo:
 
 ``` sh
-drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
+drapps -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./examples/demo-streamlit
 ```
 
 This example script works as follows:
