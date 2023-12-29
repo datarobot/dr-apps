@@ -1,8 +1,9 @@
-from setuptools import find_packages, setup
 from os import path
 
+from setuptools import find_packages, setup
+
 NAME = 'drapps'
-REPO_NAME = 'dr-streamlit'
+REPO_NAME = 'dr-apps'
 
 
 install_requires = [
@@ -11,17 +12,27 @@ install_requires = [
     'requests==2.31.0',
 ]
 
+tests_require = [
+    'pytest==7.4.3',
+    'black==23.12.0 ',
+    'flake8==6.1.0',
+    'mypy==1.7.1',
+    'types-requests==2.31.0.10',
+    'isort==5.13.2',
+]
+
 setup(
     name=NAME,
     description='CLI client for custom application in Data Robot',
     long_description=open(path.join(path.dirname(__file__), 'README.md')).read(),
     author='Data Robot',
     url='https://github.com/datarobot/{}'.format(REPO_NAME),
-    version='0.1.3',
     packages=find_packages(exclude=['examples']),
     package_dir={NAME: NAME},
     python_requires='>=3.7',
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={'test': tests_require},
     scripts=['bin/drapps'],
     classifiers=[
         'Programming Language :: Python',
