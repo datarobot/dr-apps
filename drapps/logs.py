@@ -16,8 +16,7 @@ from .helpers.custom_apps_functions import get_custom_app_logs, get_custom_apps_
 from .helpers.exceptions import ClientResponseError
 from .helpers.wrappers import api_endpoint, api_token
 
-# SLEEP_TIME = 30
-SLEEP_TIME = 0
+SLEEP_TIME = 30
 
 
 @click.command()
