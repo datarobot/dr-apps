@@ -14,21 +14,21 @@ test:
 # 	py.test -sv tests/
 
 black:
-	black ./bin ./drapps -S -l 100
+	black ./bin ./drapps ./tests -S -l 100
 
 black-check:
-	black ./bin ./drapps -S --check -l 100
+	black ./bin ./drapps ./tests -S --check -l 100
 
 isort:
-	isort ./bin ./drapps
+	isort ./bin ./drapps ./tests
 
 isort-check:
-	isort -c ./bin ./drapps
+	isort -c ./bin ./drapps ./tests
 
 mypy:
 	mypy --config-file=mypy.ini ./drapps
 
 flake:
-	flake8 bin drapps
+	flake8 bin drapps tests
 
 lint: isort-check black-check mypy flake
