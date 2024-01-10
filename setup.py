@@ -10,6 +10,7 @@ install_requires = [
     'bson==0.5.10',
     'click==8.1.7',
     'requests==2.31.0',
+    'tabulate==0.9.0',
 ]
 
 tests_require = [
@@ -17,9 +18,10 @@ tests_require = [
     'responses==0.23.3',
     'black==23.12.0 ',
     'flake8==6.1.0',
+    'isort==5.13.2',
     'mypy==1.7.1',
     'types-requests==2.31.0.10',
-    'isort==5.13.2',
+    'types-tabulate==0.9.0.20240106'
 ]
 
 setup(
