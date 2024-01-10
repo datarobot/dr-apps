@@ -14,6 +14,7 @@ install_requires = [
 
 tests_require = [
     'pytest==7.4.3',
+    'responses==0.23.3',
     'black==23.12.0 ',
     'flake8==6.1.0',
     'mypy==1.7.1',
@@ -38,6 +39,10 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         'Operating System :: OS Independent',
     ],
 )
