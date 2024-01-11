@@ -71,9 +71,9 @@ def terminate(token: str, endpoint: str, application_id_or_name: Tuple[str]) -> 
             remove_app(session, endpoint, app_id_name)
         except ClientResponseError as error:
             if error.status == 404:
-                click.echo(f'Cannot find application {app_id_name}.')
+                click.echo(f'Cannot find application {app_id_name}.', err=True)
             elif error.status == 403:
-                click.echo(f'No permissions for deleting {app_id_name}.')
+                click.echo(f'No permissions for deleting {app_id_name}.', err=True)
             else:
                 raise error
         else:
