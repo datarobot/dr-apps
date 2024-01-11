@@ -8,7 +8,6 @@
 from typing import Any, Dict, List
 
 import click
-import requests
 from requests import Session
 from tabulate import tabulate
 
@@ -28,7 +27,7 @@ def list_apps(session: Session, endpoint: str, id_only: bool) -> str:
     apps = get_custom_apps_list(session, endpoint)
 
     if id_only:
-        return ' '.join([app['id'] for app in apps])
+        return '\n'.join([app['id'] for app in apps])
 
     headers = ['id', 'name', 'status', 'applicationUrl']
     return format_table(apps, headers)
@@ -38,7 +37,7 @@ def list_environments(session: Session, endpoint: str, id_only: bool) -> str:
     envs = get_execution_environments_list(session, endpoint)
 
     if id_only:
-        return ' '.join([ee['id'] for ee in envs])
+        return '\n'.join([ee['id'] for ee in envs])
 
     headers = ['id', 'name', 'description']
     return format_table(envs, headers)
@@ -51,7 +50,7 @@ def list_environments(session: Session, endpoint: str, id_only: bool) -> str:
 @click.argument('entity', type=click.Choice(['apps', 'envs']))
 def ls(token: str, endpoint: str, id_only: bool, entity: str) -> None:
     """Provide list of custom applications or execution environments."""
-    session = requests.Session()
+    session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 
     if entity == 'apps':

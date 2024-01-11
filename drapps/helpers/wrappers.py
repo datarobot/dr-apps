@@ -31,7 +31,9 @@ def api_token(command: Callable[..., None]) -> Callable[..., None]:
     for attr in MIMIC_ATTRIBUTES:
         if hasattr(command, attr):
             setattr(wrapper, attr, getattr(command, attr))
-    option_wrapper = click.option('-t', '--token', type=str, help='Pubic API access token.')
+    option_wrapper = click.option(
+        '-t', '--token', type=click.STRING, help='Pubic API access token.'
+    )
     return option_wrapper(wrapper)
 
 
@@ -50,6 +52,6 @@ def api_endpoint(command: Callable[..., None]) -> Callable[..., None]:
         if hasattr(command, attr):
             setattr(wrapper, attr, getattr(command, attr))
     option_wrapper = click.option(
-        '-E', '--endpoint', type=str, help='Data Robot Public API endpoint.'
+        '-E', '--endpoint', type=click.STRING, help='Data Robot Public API endpoint.'
     )
     return option_wrapper(wrapper)

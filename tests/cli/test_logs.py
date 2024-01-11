@@ -44,7 +44,7 @@ def test_logs(api_endpoint_env, api_token_env, use_name):
 
     runner = CliRunner()
     result = runner.invoke(logs, [identifier])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.exception
     assert result.output == app_logs + '\n'
 
 
