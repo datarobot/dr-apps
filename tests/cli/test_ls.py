@@ -44,7 +44,7 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
     }
     if ids_only:
         expected_output = (
-            '65980d79eea4fd0eddd59bba\n' '659964182522de6a026de5cd\n' '659964382522de6a026de5ce\n'
+            '65980d79eea4fd0eddd59bba\n659964182522de6a026de5cd\n659964382522de6a026de5ce\n'
         )
     else:
         expected_output = (
@@ -99,7 +99,7 @@ def test_ls_envs(api_endpoint_env, api_token_env, ids_only):
     }
     if ids_only:
         expected_output = (
-            '659966682522de6a026de5d2\n' '659966682522de6a026de5d3\n' '659966682522de6a026de5d4\n'
+            '659966682522de6a026de5d2\n659966682522de6a026de5d3\n659966682522de6a026de5d4\n'
         )
     else:
         expected_output = (
