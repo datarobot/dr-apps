@@ -5,15 +5,13 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
-import posixpath
 from time import sleep
 
 import click
-import requests
 from bson import ObjectId
+from requests import Session
 
-from .helpers.custom_apps_functions import get_custom_app_logs, get_custom_apps_list
-from .helpers.exceptions import ClientResponseError
+from .helpers.custom_apps_functions import get_custom_app_logs, get_custom_app_by_name
 from .helpers.wrappers import api_endpoint, api_token
 
 SLEEP_TIME = 30
@@ -30,24 +28,17 @@ SLEEP_TIME = 30
     default=False,
     help='Output append data as new log records appear.',
 )
-@click.argument('application_id_or_name', type=str)
+@click.argument('application_id_or_name', type=click.STRING)
 def logs(token: str, endpoint: str, follow: bool, application_id_or_name: str) -> None:
-    """Provide logs for custom application"""
-    session = requests.Session()
+    """Provide logs for custom application."""
+    session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 
     if ObjectId.is_valid(application_id_or_name):
         app_id = application_id_or_name
     else:
-        apps = get_custom_apps_list(session, endpoint, app_name=application_id_or_name)
-        if not apps:
-            # imitating that app is not found
-            error_url = posixpath.join(endpoint, 'customApplications/')
-            raise ClientResponseError(
-                status=404, message='Can\'t find custom application by name', url=error_url
-            )
-
-        app_id = apps[0]['id']
+        app = get_custom_app_by_name(session, endpoint, app_name=application_id_or_name)
+        app_id = app['id']
 
     app_logs = get_custom_app_logs(session, endpoint, app_id)
     click.echo(app_logs, nl=False)
