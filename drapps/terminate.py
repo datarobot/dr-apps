@@ -12,7 +12,7 @@ import click
 from bson import ObjectId
 from requests import Session
 
-from .helpers.custom_apps_functions import get_custom_app_by_name, delete_custom_app
+from .helpers.custom_apps_functions import delete_custom_app, get_custom_app_by_name
 from .helpers.exceptions import ClientResponseError
 from .helpers.wrappers import api_endpoint, api_token
 

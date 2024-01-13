@@ -65,7 +65,7 @@ def test_logs_with_wrong_app_name(api_endpoint_env, api_token_env):
     runner = CliRunner()
     result = runner.invoke(logs, [app_name])
     assert result.exit_code == 1
-    expected_error = f'404, message=Can\'t find custom application by name, url={api_endpoint_env}/customApplications/'
+    expected_error = f'404, message=Can\'t find custom application by name., url={api_endpoint_env}/customApplications/'
     assert str(result.exception) == expected_error
 
 

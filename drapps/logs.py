@@ -11,7 +11,7 @@ import click
 from bson import ObjectId
 from requests import Session
 
-from .helpers.custom_apps_functions import get_custom_app_logs, get_custom_app_by_name
+from .helpers.custom_apps_functions import get_custom_app_by_name, get_custom_app_logs
 from .helpers.wrappers import api_endpoint, api_token
 
 SLEEP_TIME = 30
@@ -30,7 +30,7 @@ SLEEP_TIME = 30
 )
 @click.argument('application_id_or_name', type=click.STRING)
 def logs(token: str, endpoint: str, follow: bool, application_id_or_name: str) -> None:
-    """Provide logs for custom application."""
+    """Provides logs for custom application."""
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 

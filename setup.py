@@ -10,6 +10,7 @@ install_requires = [
     'bson==0.5.10',
     'click==8.1.7',
     'requests==2.31.0',
+    'requests-toolbelt==1.0.0',
     'tabulate==0.9.0',
 ]
 

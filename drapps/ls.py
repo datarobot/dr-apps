@@ -49,7 +49,7 @@ def list_environments(session: Session, endpoint: str, id_only: bool) -> str:
 @click.option('--id-only', is_flag=True, show_default=True, default=False, help='Output only ids')
 @click.argument('entity', type=click.Choice(['apps', 'envs']))
 def ls(token: str, endpoint: str, id_only: bool, entity: str) -> None:
-    """Provide list of custom applications or execution environments."""
+    """Provides list of custom applications or execution environments."""
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 

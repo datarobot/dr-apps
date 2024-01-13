@@ -13,7 +13,7 @@ import click
 import requests
 from bson import ObjectId
 
-from drapps.helpers.win_to_unix_fixes import file_reader_fix_new_lines
+from .helpers.app_projects_functions import file_reader_fix_new_lines
 
 ENTRYPOINT_SCRIPT_NAME = "start-app.sh"
 
