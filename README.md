@@ -30,7 +30,7 @@ access the following information:
 
 ``` sh
 $ drapps --help
-Usage: drapps.py [OPTIONS]
+Usage: drapps [OPTIONS]
 
     App that uses local file for create new custom application
 
@@ -61,7 +61,7 @@ To test this, deploy an example Streamlit app using the following command from
 the root directory of this repo:
 
 ``` sh
-drapps.py -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
+drapps -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit
 ```
 
 This example script works as follows:
