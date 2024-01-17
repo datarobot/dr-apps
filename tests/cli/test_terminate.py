@@ -10,7 +10,6 @@ import json
 import pytest
 import responses
 from bson import ObjectId
-
 from click.testing import CliRunner
 from responses import matchers
 

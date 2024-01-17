@@ -16,15 +16,19 @@ MIMIC_ATTRIBUTES = ['__click_params__', '__name__', '__doc__']
 
 def api_token(command: Callable[..., None]) -> Callable[..., None]:
     """Attaches a token option to the command with possibility to set up this option from ENV variables"""
+    name = 'token'
+    short = 't'
 
     def wrapper(*args, **kwargs) -> None:
-        if not kwargs.get('token'):
+        if not kwargs.get(name):
             token = os.environ.get('DATAROBOT_API_TOKEN')
             if not token:
-                raise ValueError(
-                    'You need to set DR API token through parameters or DATAROBOT_API_TOKEN env variable.'
+                raise click.MissingParameter(
+                    'You need to set DR API token through parameters or DATAROBOT_API_TOKEN env variable.',
+                    param_hint=f'-{short}/--{name}',
+                    param_type='option',
                 )
-            kwargs['token'] = token
+            kwargs[name] = token
 
         command(*args, **kwargs)
 
@@ -32,7 +36,7 @@ def api_token(command: Callable[..., None]) -> Callable[..., None]:
         if hasattr(command, attr):
             setattr(wrapper, attr, getattr(command, attr))
     option_wrapper = click.option(
-        '-t', '--token', type=click.STRING, help='Pubic API access token.'
+        f'--{name}', f'-{short}', type=click.STRING, help='Pubic API access token.'
     )
     return option_wrapper(wrapper)
 
