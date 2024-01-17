@@ -30,30 +30,104 @@ access the following information:
 
 ``` sh
 $ drapps --help
-Usage: drapps.py [OPTIONS]
-
-    App that uses local file for create new custom application
+Usage: drapps [OPTIONS] COMMAND [ARGS]...
 
 Options:
-    -e, --base-env TEXT   Name or ID for execution environment.  [required]
-    -p, --path DIRECTORY  Path to folder with files that should be uploaded.
-                          Default: current folder
-    -n, --name TEXT       Name for new custom application. Default: CustomApp
-    -t, --token TEXT      Pubic API access token.
-    -E, --endpoint TEXT   Data Robot Public API endpoint.
-    --help                Show this message and exit.
+  --help  Show this message and exit.
 
+Commands:
+  create     Creates new custom application from docker image or base...
+  logs       Provides logs for custom application.
+  ls         Provides list of custom applications or execution environments.
+  terminate  Stops custom application and removes it from the list.
 ```
+You can use `--help` for each command separately for each command
 
+### Create custom application
+``` sh
+$ drapps create --help
+Usage: drapps create [OPTIONS] APPLICATION_NAME
+
+  Creates new custom application from docker image or base environment.
+
+Options:
+  -t, --token TEXT      Pubic API access token.
+  -E, --endpoint TEXT   Data Robot Public API endpoint.
+  -e, --base-env TEXT   Name or ID for execution environment.
+  -p, --path DIRECTORY  Path to folder with files that should be uploaded.
+  -i, --image FILE      Path to tar archive with custom application docker
+                        images.
+  --skip-wait           Do not wait for ready status.
+  --help                Show this message and exit.
+```
 More detailed descriptions for each argument are provided in the table below:
 
+Argument          | Description
+------------------|-------------
+`APPLICATION_NAME`| Enter the name of your custom application. This name is also used to generate the name of the custom application image, adding `Image` suffix.
+`--token`         | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
+`--endpoint`      | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
+`--base-env`      | Enter the UUID or name of execution environment used as base for your Streamlit app. The execution environment contains the libraries and packages required by your application. You can find list of available environments in the **Custom Model Workshop** on the [**Environments**](https://app.datarobot.com/model-registry/custom-environments) page. <br> For a custom Streamlit application, use `--base-env '[DataRobot] Python 3.9 Streamlit'`.
+`--path`          | Enter the path to a folder used to create the custom application. Files from this folder are uploaded to DataRobot and used to create the custom application image. The custom application is started from this image. <br> To use the current working directory, use `--path .`.
+`--image`         | Enter the path to a archive with docker image. <br> You can save your docker image to file with `docker save <image_name> > <file_name>.tar`
+`--skip-wait`     | Do not wait till application will finish setup and exit from the scipt directly after application creation request will be send.
+
+### Logs
+``` sh
+$ drapps logs --help
+Usage: drapps logs [OPTIONS] APPLICATION_ID_OR_NAME
+
+  Provides logs for custom application.
+
+Options:
+  -t, --token TEXT     Pubic API access token.
+  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  -f, --follow         Output append data as new log records appear.
+  --help               Show this message and exit.
+```
+Argument                | Description
+------------------------|-------------
+`APPLICATION_ID_OR_NAME`| ID or name of application, which logs you want to see.
+`--token`               | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
+`--endpoint`            | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
+`--follow`              | Script continues checking for new log records and displays if they appear
+
+### List of base custom applications or base environments
+``` sh
+$ drapps ls --help
+Usage: drapps ls [OPTIONS] {apps|envs}
+
+  Provides list of custom applications or execution environments.
+
+Options:
+  -t, --token TEXT     Pubic API access token.
+  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  --id-only            Output only ids
+  --help               Show this message and exit.
+
+```
 Argument     | Description
 -------------|-------------
-`--base-env` | Enter the UUID or name of execution environment used as base for your Streamlit app. The execution environment contains the libraries and packages required by your application. You can find list of available environments in the **Custom Model Workshop** on the [**Environments**](https://app.datarobot.com/model-registry/custom-environments) page. <br> For a custom Streamlit application, use `--base-env '[DataRobot] Python 3.9 Streamlit'`.
-`--path`     | Enter the path to a folder used to create the custom application. Files from this folder are uploaded to DataRobot and used to create the custom application image. The custom application is started from this image. <br> To use the current working directory, use `--path .`.
-`--name`     | Enter the name of your custom application. This name is also used to generate the name of the custom application image, adding `Image` suffix. <br> The default value is `CustomApp`.
 `--token`    | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
 `--endpoint` | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
+`--id-only`  | Show only IDs of entity. <br> Can be useful with piping to terminate command
+
+### Terminate
+``` sh
+Usage: drapps terminate [OPTIONS] APPLICATION_ID_OR_NAME...
+
+  Stops custom application and removes it from the list.
+
+Options:
+  -t, --token TEXT     Pubic API access token.
+  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  --help               Show this message and exit.
+```
+Argument                | Description
+------------------------|-------------
+`APPLICATION_ID_OR_NAME`| Space separated list of IDs or names of applications, that needs to be removed.
+`--token`               | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
+`--endpoint`            | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
 
 ## Deploy an example app
 
@@ -61,7 +135,7 @@ To test this, deploy an example Streamlit app using the following command from
 the root directory of this repo:
 
 ``` sh
-drapps -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./examples/demo-streamlit
+drapps create -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit DemoApp
 ```
 
 This example script works as follows:
@@ -80,8 +154,8 @@ environment version defined in the first step.
 4. Starts a new application with the custom application image version created 
 in the previous step.
 
-When this script runs successfully, `Custom application successfully created` appears 
-in the terminal. You can access the application on the DataRobot 
+When this script runs successfully, link to it appears 
+in the terminal. Also, you can access the application on the DataRobot 
 Applications tab [Non EU DataRobot](https://app.datarobot.com/applications) [EU DataRobot](https://app.eu.datarobot.com/applications).
 
 > [!IMPORTANT]

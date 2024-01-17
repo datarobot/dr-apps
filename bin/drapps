@@ -6,7 +6,14 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
-from drapps.create_app import create
+from click import Group
+
+from drapps.create import create
+from drapps.logs import logs
+from drapps.ls import ls
+from drapps.terminate import terminate
+
+drapps = Group(commands=[create, ls, logs, terminate])
 
 if __name__ == "__main__":
-    create()
+    drapps()
