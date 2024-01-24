@@ -32,6 +32,10 @@ access the following information:
 $ drapps --help
 Usage: drapps [OPTIONS] COMMAND [ARGS]...
 
+  CLI tools for custom applications.
+
+  You can use drapps COMMAND --help for getting more info about command.
+
 Options:
   --help  Show this message and exit.
 
@@ -50,9 +54,15 @@ Usage: drapps create [OPTIONS] APPLICATION_NAME
 
   Creates new custom application from docker image or base environment.
 
+  If application created from project folder, custom application image will be
+  created or existing will be updated.
+
 Options:
-  -t, --token TEXT      Pubic API access token.
-  -E, --endpoint TEXT   Data Robot Public API endpoint.
+  -t, --token TEXT      Pubic API access token. You can use
+                        DATAROBOT_API_TOKEN env instead.
+  -E, --endpoint TEXT   Data Robot Public API endpoint. You can use
+                        DATAROBOT_ENDPOINT instead. Default:
+                        https://app.datarobot.com/api/v2
   -e, --base-env TEXT   Name or ID for execution environment.
   -p, --path DIRECTORY  Path to folder with files that should be uploaded.
   -i, --image FILE      Path to tar archive with custom application docker
@@ -80,8 +90,11 @@ Usage: drapps logs [OPTIONS] APPLICATION_ID_OR_NAME
   Provides logs for custom application.
 
 Options:
-  -t, --token TEXT     Pubic API access token.
-  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  -t, --token TEXT     Pubic API access token. You can use DATAROBOT_API_TOKEN
+                       env instead.
+  -E, --endpoint TEXT  Data Robot Public API endpoint. You can use
+                       DATAROBOT_ENDPOINT instead. Default:
+                       https://app.datarobot.com/api/v2
   -f, --follow         Output append data as new log records appear.
   --help               Show this message and exit.
 ```
@@ -100,11 +113,13 @@ Usage: drapps ls [OPTIONS] {apps|envs}
   Provides list of custom applications or execution environments.
 
 Options:
-  -t, --token TEXT     Pubic API access token.
-  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  -t, --token TEXT     Pubic API access token. You can use DATAROBOT_API_TOKEN
+                       env instead.
+  -E, --endpoint TEXT  Data Robot Public API endpoint. You can use
+                       DATAROBOT_ENDPOINT instead. Default:
+                       https://app.datarobot.com/api/v2
   --id-only            Output only ids
   --help               Show this message and exit.
-
 ```
 Argument     | Description
 -------------|-------------
@@ -114,13 +129,17 @@ Argument     | Description
 
 ### Terminate
 ``` sh
+$ drapps terminate --help
 Usage: drapps terminate [OPTIONS] APPLICATION_ID_OR_NAME...
 
   Stops custom application and removes it from the list.
 
 Options:
-  -t, --token TEXT     Pubic API access token.
-  -E, --endpoint TEXT  Data Robot Public API endpoint.
+  -t, --token TEXT     Pubic API access token. You can use DATAROBOT_API_TOKEN
+                       env instead.
+  -E, --endpoint TEXT  Data Robot Public API endpoint. You can use
+                       DATAROBOT_ENDPOINT instead. Default:
+                       https://app.datarobot.com/api/v2
   --help               Show this message and exit.
 ```
 Argument                | Description

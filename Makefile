@@ -10,8 +10,7 @@ req-test:
 	pip install -e .[test]
 
 test:
-	echo "NO TESTS"
-# 	py.test -sv tests/
+	py.test -sv tests/
 
 black:
 	black ./bin ./drapps ./tests -S -l 100

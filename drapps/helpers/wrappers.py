@@ -35,9 +35,9 @@ def api_token(command: Callable[..., None]) -> Callable[..., None]:
     for attr in MIMIC_ATTRIBUTES:
         if hasattr(command, attr):
             setattr(wrapper, attr, getattr(command, attr))
-    option_wrapper = click.option(
-        f'--{name}', f'-{short}', type=click.STRING, help='Pubic API access token.'
-    )
+
+    help_text = 'Pubic API access token. You can use DATAROBOT_API_TOKEN env instead.'
+    option_wrapper = click.option(f'--{name}', f'-{short}', type=click.STRING, help=help_text)
     return option_wrapper(wrapper)
 
 
@@ -55,7 +55,10 @@ def api_endpoint(command: Callable[..., None]) -> Callable[..., None]:
     for attr in MIMIC_ATTRIBUTES:
         if hasattr(command, attr):
             setattr(wrapper, attr, getattr(command, attr))
-    option_wrapper = click.option(
-        '-E', '--endpoint', type=click.STRING, help='Data Robot Public API endpoint.'
+
+    help_text = (
+        'Data Robot Public API endpoint. You can use DATAROBOT_ENDPOINT instead. '
+        'Default: https://app.datarobot.com/api/v2'
     )
+    option_wrapper = click.option('-E', '--endpoint', type=click.STRING, help=help_text)
     return option_wrapper(wrapper)
