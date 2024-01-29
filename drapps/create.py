@@ -269,7 +269,12 @@ def create(
     skip_wait: bool,
     application_name: str,
 ) -> None:
-    """Creates new custom application from docker image or base environment."""
+    """
+    Creates new custom application from docker image or base environment.
+
+    If application created from project folder, custom application image will be created
+    or existing will be updated.
+    """
     validate_parameters(base_env, path, image)
     if path:
         check_project(path)
