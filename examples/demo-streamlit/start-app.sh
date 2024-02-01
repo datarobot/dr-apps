@@ -8,4 +8,4 @@
 #
 echo "Starting App"
 
-streamlit run demo-streamlit.py
+streamlit run --server.port 8080 demo-streamlit.py
