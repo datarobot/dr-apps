@@ -5,9 +5,12 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
-from typing import Any, Dict, List
+from datetime import datetime
+from functools import partial
+from typing import Any, Callable, Dict, List
 
 import click
+from dateutil import parser
 from requests import Session
 from tabulate import tabulate
 
@@ -16,10 +19,30 @@ from .helpers.execution_environments_functions import get_execution_environments
 from .helpers.wrappers import api_endpoint, api_token
 
 
-def format_table(data: List[Dict[str, Any]], headers: List[str]) -> str:
+def _string_fetcher(field_name: str, entity) -> str:
+    return entity.get(field_name)
+
+
+def _date_fetcher(field_name: str, entity) -> str:
+    str_date = entity.get(field_name)
+    if not str_date:
+        return ''
+
+    date = parser.parse(str_date)
+    if date.date() == datetime.today().date():
+        # if it was today, return just time
+        return date.strftime('%H:%M:%S')
+    else:
+        return date.date().isoformat()
+
+
+def format_table(
+    data: List[Dict[str, Any]], data_fetchers: Dict[str, Callable[[Dict[str, Any]], str]]
+) -> str:
+    headers = list(data_fetchers.keys())
     rows = []
     for element in data:
-        rows.append([element[column] for column in headers])
+        rows.append([data_fetchers[column](element) for column in headers])
     return tabulate(rows, headers=headers, tablefmt='simple')
 
 
@@ -29,8 +52,14 @@ def list_apps(session: Session, endpoint: str, id_only: bool) -> str:
     if id_only:
         return '\n'.join([app['id'] for app in apps])
 
-    headers = ['id', 'name', 'status', 'applicationUrl']
-    return format_table(apps, headers)
+    data_fetchers = {
+        'id': partial(_string_fetcher, 'id'),
+        'name': partial(_string_fetcher, 'name'),
+        'status': partial(_string_fetcher, 'status'),
+        'updated': partial(_date_fetcher, 'updatedAt'),
+        'URL': partial(_string_fetcher, 'applicationUrl'),
+    }
+    return format_table(apps, data_fetchers)  # type: ignore[arg-type]
 
 
 def list_environments(session: Session, endpoint: str, id_only: bool) -> str:
@@ -39,8 +68,12 @@ def list_environments(session: Session, endpoint: str, id_only: bool) -> str:
     if id_only:
         return '\n'.join([ee['id'] for ee in envs])
 
-    headers = ['id', 'name', 'description']
-    return format_table(envs, headers)
+    data_fetchers = {
+        'id': partial(_string_fetcher, 'id'),
+        'name': partial(_string_fetcher, 'name'),
+        'description': partial(_string_fetcher, 'description'),
+    }
+    return format_table(envs, data_fetchers)  # type: ignore[arg-type]
 
 
 @click.command()

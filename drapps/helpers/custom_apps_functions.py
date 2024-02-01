@@ -66,13 +66,12 @@ def get_custom_app_by_name(session: Session, endpoint: str, app_name: str) -> Di
     return apps[0]
 
 
-def get_custom_app_logs(session: Session, endpoint: str, app_id: str) -> str:
+def get_custom_app_logs(session: Session, endpoint: str, app_id: str) -> Dict[str, Any]:
     """Get runtime logs for a custom application."""
     url = posixpath.join(endpoint, f'customApplications/{app_id}/logs/')
     response = session.get(url)
     handle_dr_response(response)
-    records = response.json()['logs']
-    return '\n'.join(records)
+    return response.json()
 
 
 def delete_custom_app(session: Session, endpoint: str, app_id: str) -> None:
