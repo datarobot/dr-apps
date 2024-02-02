@@ -9,6 +9,7 @@ REPO_NAME = 'dr-apps'
 install_requires = [
     'bson==0.5.10',
     'click==8.1.7',
+    'dateutils==0.6.12',
     'requests==2.31.0',
     'requests-toolbelt==1.0.0',
     'tabulate==0.9.0',
@@ -17,12 +18,13 @@ install_requires = [
 tests_require = [
     'pytest==7.4.3',
     'responses==0.23.3',
-    'black==23.12.0 ',
+    'black==23.12.0',
     'flake8==6.1.0',
     'isort==5.13.2',
     'mypy==1.7.1',
     'types-requests==2.31.0.10',
-    'types-tabulate==0.9.0.20240106'
+    'types-tabulate==0.9.0.20240106',
+    'types-python-dateutil==2.8.19.20240106',
 ]
 
 setup(

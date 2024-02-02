@@ -18,7 +18,8 @@ from drapps.logs import logs
 
 @responses.activate
 @pytest.mark.parametrize('use_name', (False, True))
-def test_logs(api_endpoint_env, api_token_env, use_name):
+@pytest.mark.parametrize('image_build_failed', (False, True))
+def test_logs(api_endpoint_env, api_token_env, use_name, image_build_failed):
     app_id = str(ObjectId())
     app_name = 'app_name'
 
@@ -37,15 +38,27 @@ def test_logs(api_endpoint_env, api_token_env, use_name):
         )
 
     app_logs = 'here is some logs'
+    build_error = 'here is some build error'
+    build_logs = 'here is some build logs'
+    if image_build_failed:
+        logs_payload = {'logs': [], 'buildError': build_error, 'buildLog': build_logs}
+        expected_output = (
+            f'Dependency image build error: {build_error}\n'
+            f'Dependency image build log:\n{build_logs}\n'
+        )
+    else:
+        logs_payload = {'logs': [app_logs], 'buildError': '', 'buildLogs': build_logs}
+        expected_output = app_logs + '\n'
+
     logs_url = f'{api_endpoint_env}/customApplications/{app_id}/logs/'
-    responses.get(logs_url, json={'logs': [app_logs]}, match=[auth_matcher])
+    responses.get(logs_url, json=logs_payload, match=[auth_matcher])
 
     identifier = app_name if use_name else app_id
 
     runner = CliRunner()
     result = runner.invoke(logs, [identifier])
     assert result.exit_code == 0, result.exception
-    assert result.output == app_logs + '\n'
+    assert result.output == expected_output
 
 
 @responses.activate

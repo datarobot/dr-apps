@@ -313,10 +313,24 @@ def create(
 
     click.echo('Custom application did not achieve stable state.', err=True)
     logs = get_custom_app_logs(session=session, endpoint=endpoint, app_id=app_data['id'])
-    if logs:
+
+    dependency_build_error = logs.get('buildError')
+    runtime_log = '\n'.join(logs.get('logs', []))
+
+    if dependency_build_error:
+        click.echo(
+            f'Error happened during dependency image build: {dependency_build_error}', err=True
+        )
+        dependency_build_logs = logs.get('buildLog')
+        if dependency_build_logs:
+            click.echo(dependency_build_logs, err=True)
+
+    elif runtime_log:
         click.echo('Runtime log:', err=True)
-        click.echo(logs, err=True)
+        click.echo(runtime_log, err=True)
+
     else:
         click.echo(
-            'There is no runtime logs. It looks like something wrong with app image.', err=True
+            f'There are no logs for application {app_data["id"]}. Please get in touch with support.',
+            err=True,
         )
