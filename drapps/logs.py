@@ -57,7 +57,7 @@ def logs(token: str, endpoint: str, follow: bool, application_id_or_name: str) -
         image_build_logs = app_logs.get('buildLog')
 
         if not (image_build_error or image_build_logs):
-            click.echo('This app currently has no logs')
+            click.echo('This app currently has no logs.')
             return
 
         if image_build_error:

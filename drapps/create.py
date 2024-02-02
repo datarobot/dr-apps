@@ -331,6 +331,6 @@ def create(
 
     else:
         click.echo(
-            f'There is no logs for application {app_data["id"]}. Please get in touch with support',
+            f'There are no logs for application {app_data["id"]}. Please get in touch with support.',
             err=True,
         )
