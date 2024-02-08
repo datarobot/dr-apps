@@ -19,9 +19,19 @@ pip install git+https://github.com/datarobot/dr-apps
 To install the DRApps CLI tool, clone this 
 respository and then install package by running the following command:
 
-``` sh
+``` sh 
 python setup.py install
 ```
+
+## For Windows Users
+
+For Windows users, you may need to interface with the DR Custom Apps CLI via module calls:
+
+```sh
+python -m drapps <your_commands_here>
+```
+If you have issues entering words with spaces ( eg: `-e "[Experimental] Python 3.9 Streamlit"` )
+then you may find that using ids is a little easier.
 
 ## Use the DRApps CLI
 
