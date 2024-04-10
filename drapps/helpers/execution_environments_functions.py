@@ -14,6 +14,10 @@ from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 from .exceptions import ClientResponseError
 from .handle_dr_response import handle_dr_response
 
+IMAGE_BUILD_SUCCESS_STATUSES = {'success'}
+IMAGE_BUILD_FAILED_STATUSES = {'failed'}
+IMAGE_BUILD_FINAL_STATUSES = IMAGE_BUILD_SUCCESS_STATUSES | IMAGE_BUILD_FAILED_STATUSES
+
 
 def create_execution_environment(
     session: Session, endpoint: str, env_name: str, description: Optional[str] = None
@@ -82,5 +86,15 @@ def create_execution_environment_version(
     response = session.post(
         url, data=multipart_data, headers={'Content-Type': multipart_data.content_type}
     )
+    handle_dr_response(response)
+    return response.json()
+
+
+def get_execution_environment_version_by_id(
+    session: Session, endpoint: str, base_env_id: str, version_id: str
+) -> Dict[str, Any]:
+    """Get a execution environment version by environment ID and version ID."""
+    url = posixpath.join(endpoint, f"executionEnvironments/{base_env_id}/versions/{version_id}/")
+    response = session.get(url)
     handle_dr_response(response)
     return response.json()

@@ -34,10 +34,13 @@ from .helpers.custom_apps_functions import (
 )
 from .helpers.exceptions import ClientResponseError
 from .helpers.execution_environments_functions import (
+    IMAGE_BUILD_FAILED_STATUSES,
+    IMAGE_BUILD_FINAL_STATUSES,
     create_execution_environment,
     create_execution_environment_version,
     get_execution_environment_by_id,
     get_execution_environment_by_name,
+    get_execution_environment_version_by_id,
 )
 from .helpers.wrappers import api_endpoint, api_token
 
@@ -188,12 +191,25 @@ def send_docker_image_with_progress(
 
             multipart_monitor.callback = monitor_callback
 
-            create_execution_environment_version(
+            response = create_execution_environment_version(
                 session=session,
                 endpoint=endpoint,
                 base_env_id=base_env_id,
                 multipart_data=multipart_monitor,
             )
+    version_id = response['id']
+    with click.progressbar(iterable=repeat(0), label='Waiting till image is ready:') as progress:
+        while True:
+            response = get_execution_environment_version_by_id(
+                session=session, endpoint=endpoint, base_env_id=base_env_id, version_id=version_id
+            )
+            img_status = response.get('buildStatus')
+            if img_status in IMAGE_BUILD_FINAL_STATUSES:
+                break
+            progress.update(1)
+            sleep(CHECK_STATUS_WAIT_TIME)
+    if img_status in IMAGE_BUILD_FAILED_STATUSES:
+        raise Exception("Image build failed")
 
 
 def create_app_from_docker_image(

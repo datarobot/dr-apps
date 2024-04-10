@@ -58,11 +58,18 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
     )
 
     # request for uploading docker image to execution environment version
+    ee_environment_version_id = str(ObjectId())
     responses.post(
         f'{api_endpoint_env}/executionEnvironments/{ee_environment_id}/versions/',
-        json={'id': str(ObjectId())},
+        json={'id': ee_environment_version_id},
         match=[auth_matcher],
     )
+    # requests for checking image readiness
+    ee_environment_version_url = f'{api_endpoint_env}/executionEnvironments/{ee_environment_id}/versions/{ee_environment_version_id}/'
+    responses.get(
+        ee_environment_version_url, json={'buildStatus': 'processing'}, match=[auth_matcher]
+    )
+    responses.get(ee_environment_version_url, json={'buildStatus': 'success'}, match=[auth_matcher])
 
     # request for creating custom app
     status_check_url = 'http://ho.st/status/status_id'
@@ -88,6 +95,7 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
     expected_output = (
         f'Uploading {image_name} to Data Robot.\n'
         'Upload progress:\n'
+        'Waiting till image is ready:\n'
         f'Starting {app_name} custom application.\n'
     )
     if wait_till_ready:

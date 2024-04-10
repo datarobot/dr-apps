@@ -8,6 +8,5 @@
 #
 from drapps.__main__ import drapps
 
-
 if __name__ == "__main__":
     drapps()
