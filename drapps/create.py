@@ -174,6 +174,23 @@ def create_app_from_project(
     return create_custom_app(session, endpoint, app_payload)
 
 
+def wait_for_execution_environment_version_ready(
+    session: Session, endpoint: str, base_env_id: str, version_id: str
+) -> None:
+    with click.progressbar(iterable=repeat(0), label='Waiting till image is ready:') as progress:
+        while True:
+            response = get_execution_environment_version_by_id(
+                session=session, endpoint=endpoint, base_env_id=base_env_id, version_id=version_id
+            )
+            img_status = response.get('buildStatus')
+            if img_status in IMAGE_BUILD_FINAL_STATUSES:
+                break
+            progress.update(1)
+            sleep(CHECK_STATUS_WAIT_TIME)
+    if img_status in IMAGE_BUILD_FAILED_STATUSES:
+        raise Exception("Image build failed")
+
+
 def send_docker_image_with_progress(
     session: Session, endpoint: str, base_env_id: str, docker_image: Path
 ) -> None:
@@ -197,19 +214,9 @@ def send_docker_image_with_progress(
                 base_env_id=base_env_id,
                 multipart_data=multipart_monitor,
             )
-    version_id = response['id']
-    with click.progressbar(iterable=repeat(0), label='Waiting till image is ready:') as progress:
-        while True:
-            response = get_execution_environment_version_by_id(
-                session=session, endpoint=endpoint, base_env_id=base_env_id, version_id=version_id
-            )
-            img_status = response.get('buildStatus')
-            if img_status in IMAGE_BUILD_FINAL_STATUSES:
-                break
-            progress.update(1)
-            sleep(CHECK_STATUS_WAIT_TIME)
-    if img_status in IMAGE_BUILD_FAILED_STATUSES:
-        raise Exception("Image build failed")
+    wait_for_execution_environment_version_ready(
+        session=session, endpoint=endpoint, base_env_id=base_env_id, version_id=response['id']
+    )
 
 
 def create_app_from_docker_image(
