@@ -162,40 +162,40 @@ def test_create_from_project(
             match=[auth_matcher, params_matcher],
         )
 
-    # request for checking if custom app image exists
+    # request for checking if custom app source exists
     responses.get(
-        f'{api_endpoint_env}/customApplicationImages/', json={'data': []}, match=[auth_matcher]
+        f'{api_endpoint_env}/customApplicationSources/', json={'data': []}, match=[auth_matcher]
     )
-    # request for creating new application image
-    custom_app_image_id = str(ObjectId())
-    image_data_matcher = matchers.json_params_matcher({'name': f'{app_name}Image'})
+    # request for creating new application source
+    custom_app_source_id = str(ObjectId())
+    source_data_matcher = matchers.json_params_matcher({'name': f'{app_name}Source'})
     responses.post(
-        f'{api_endpoint_env}/customApplicationImages/',
-        json={'id': custom_app_image_id},
-        match=[auth_matcher, image_data_matcher],
+        f'{api_endpoint_env}/customApplicationSources/',
+        json={'id': custom_app_source_id},
+        match=[auth_matcher, source_data_matcher],
     )
-    # request for creating new application image version
-    custom_app_image_version_id = str(ObjectId())
-    image_version_data_matcher = matchers.json_params_matcher({'label': 'script_generated_0'})
+    # request for creating new application source version
+    custom_app_source_version_id = str(ObjectId())
+    source_version_data_matcher = matchers.json_params_matcher({'label': 'script_generated_0'})
     responses.post(
-        f'{api_endpoint_env}/customApplicationImages/{custom_app_image_id}/versions/',
-        json={'id': custom_app_image_version_id},
-        match=[auth_matcher, image_version_data_matcher],
+        f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/',
+        json={'id': custom_app_source_version_id},
+        match=[auth_matcher, source_version_data_matcher],
     )
-    # request for uploading project data to image_version
-    image_version_update_data_matcher = matchers.multipart_matcher(
+    # request for uploading project data to source_version
+    source_version_update_data_matcher = matchers.multipart_matcher(
         {'file': ('start-app.sh', entrypoint_script_content)},
         data={'baseEnvironmentVersionId': ee_last_version_id, 'filePath': ['start-app.sh']},
     )
     responses.patch(
-        f'{api_endpoint_env}/customApplicationImages/{custom_app_image_id}/versions/{custom_app_image_version_id}/',
-        match=[auth_matcher, image_version_update_data_matcher],
+        f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
+        match=[auth_matcher, source_version_update_data_matcher],
     )
 
     # request for creating custom app
     status_check_url = 'http://ho.st/status/status_id'
     app_data_matcher = matchers.json_params_matcher(
-        {'name': app_name, 'applicationImageId': custom_app_image_id}
+        {'name': app_name, 'applicationSourceId': custom_app_source_id}
     )
     custom_app_response = {
         'id': str(ObjectId()),
@@ -214,8 +214,8 @@ def test_create_from_project(
         responses.get(status_check_url, json={'status': 'COMPLETED'}, match=[auth_matcher])
 
     expected_output = (
-        f'Using {app_name}Image custom application image.\n'
-        f'Creating new version for {app_name}Image custom application image.\n'
+        f'Using {app_name}Source custom application source.\n'
+        f'Creating new version for {app_name}Source custom application source.\n'
         'Uploading project:\n'
         'Starting new_app custom application.\n'
     )
