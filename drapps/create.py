@@ -17,12 +17,12 @@ from requests import Session
 from requests_toolbelt import MultipartEncoderMonitor
 
 from .helpers.app_projects_functions import check_project, get_io_stream, get_project_files_list
-from .helpers.custom_app_images_functions import (
-    create_application_image_version,
-    create_custom_app_image,
-    get_custom_app_image_by_name,
-    get_custom_app_image_versions_list,
-    update_application_image_version,
+from .helpers.custom_app_sources_functions import (
+    create_application_source_version,
+    create_custom_app_source,
+    get_custom_app_source_by_name,
+    get_custom_app_source_versions_list,
+    update_application_source_version,
 )
 from .helpers.custom_apps_functions import (
     FINAL_STATUSES,
@@ -91,27 +91,27 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
     return env['latestVersion']['id']
 
 
-def create_new_custom_app_image_version(
-    session: Session, endpoint: str, image_name: str
+def create_new_custom_app_source_version(
+    session: Session, endpoint: str, source_name: str
 ) -> Tuple[str, str]:
     try:
-        app_image = get_custom_app_image_by_name(session, endpoint, image_name)
-        versions = get_custom_app_image_versions_list(session, endpoint, app_image['id'])
+        app_source = get_custom_app_source_by_name(session, endpoint, source_name)
+        versions = get_custom_app_source_versions_list(session, endpoint, app_source['id'])
         version_count = len(versions)
     except ClientResponseError as error:
         if error.status != 404:
             raise error
-        # create a new app image if we can't find existing
-        app_image = create_custom_app_image(session, endpoint, image_name)
+        # create a new app source if we can't find existing
+        app_source = create_custom_app_source(session, endpoint, source_name)
         version_count = 0
 
-    click.echo(f'Using {image_name} custom application image.')
+    click.echo(f'Using {source_name} custom application source.')
     version_label = f'script_generated_{version_count}'
-    new_version = create_application_image_version(
-        session, endpoint, app_image['id'], version_label
+    new_version = create_application_source_version(
+        session, endpoint, app_source['id'], version_label
     )
-    click.echo(f'Creating new version for {image_name} custom application image.')
-    return app_image['id'], new_version['id']
+    click.echo(f'Creating new version for {source_name} custom application source.')
+    return app_source['id'], new_version['id']
 
 
 def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tuple[Any, ...]]:
@@ -120,11 +120,11 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
     return iter(lambda: tuple(islice(iterator, chunk_size)), ())
 
 
-def configure_custom_app_image_version(
+def configure_custom_app_source_version(
     session: Session,
     endpoint: str,
-    custom_app_image_id: str,
-    custom_app_image_version_id: str,
+    custom_app_source_id: str,
+    custom_app_source_version_id: str,
     project: Path,
     base_env_version_id: str,
 ) -> None:
@@ -141,8 +141,8 @@ def configure_custom_app_image_version(
             payload['filePath'] = files_relative_paths
             payload['file'] = files_streams
 
-            update_application_image_version(
-                session, endpoint, custom_app_image_id, custom_app_image_version_id, payload
+            update_application_source_version(
+                session, endpoint, custom_app_source_id, custom_app_source_version_id, payload
             )
             # closing all streams after upload
             for files_stream in files_streams:
@@ -157,19 +157,19 @@ def create_app_from_project(
     session: Session, endpoint: str, base_env: str, project_folder: Path, app_name: str
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
-    image_name = f'{app_name}Image'
-    custom_app_image_id, custom_app_image_version_id = create_new_custom_app_image_version(
-        session, endpoint, image_name
+    source_name = f'{app_name}Source'
+    custom_app_source_id, custom_app_source_version_id = create_new_custom_app_source_version(
+        session, endpoint, source_name
     )
-    configure_custom_app_image_version(
+    configure_custom_app_source_version(
         session=session,
         endpoint=endpoint,
-        custom_app_image_id=custom_app_image_id,
-        custom_app_image_version_id=custom_app_image_version_id,
+        custom_app_source_id=custom_app_source_id,
+        custom_app_source_version_id=custom_app_source_version_id,
         project=project_folder,
         base_env_version_id=base_env_version_id,
     )
-    app_payload = {'name': app_name, 'applicationImageId': custom_app_image_id}
+    app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
     return create_custom_app(session, endpoint, app_payload)
 
