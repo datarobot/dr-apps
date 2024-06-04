@@ -192,12 +192,12 @@ def wait_for_execution_environment_version_ready(
 
 
 def send_docker_image_with_progress(
-    session: Session, endpoint: str, base_env_id: str, docker_image: Path
+    session: Session, endpoint: str, base_env_id: str, docker_image: Path, field_name: str = 'docker_image'
 ) -> None:
     click.echo(f'Uploading {docker_image.name} to Data Robot.')
     with docker_image.open('rb') as file:
         multipart_monitor = MultipartEncoderMonitor.from_fields(
-            fields={'docker_image': (docker_image.name, file, 'application/octet-stream')}
+            fields={field_name: (docker_image.name, file, 'application/octet-stream')}
         )
         progress: ProgressBar  # type hinting badly needed by mypy
         with click.progressbar(length=multipart_monitor.len, label='Upload progress:') as progress:
