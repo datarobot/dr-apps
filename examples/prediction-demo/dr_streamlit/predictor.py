@@ -10,6 +10,12 @@ from datarobot.client import get_client, Client
 from .caches import get_model
 
 
+def is_deployment_serverless(deployment: Deployment) -> bool:
+    """
+    Returns true if a deployment has `DataRobot Serverless` as the prediction environment, else false.
+    """
+    return deployment.prediction_environment.get('platform') == 'datarobotServerless'
+
 @st.cache
 def submit_prediction(
         deployment: Deployment,
@@ -21,15 +27,20 @@ def submit_prediction(
     so this is a basic implementation
     """
     client: Client = get_client()
+    is_serverless = is_deployment_serverless(deployment)
     headers = {
         "Content-Type": "application/json; charset=UTF-8",
         "Authorization": client.headers["Authorization"],
-        "DataRobot-Key": deployment.default_prediction_server['datarobot-key'],
+        "DataRobot-Key": None if is_serverless else deployment.default_prediction_server['datarobot-key'],
     }
 
+    if is_serverless:
+        url = f'deployments/{deployment.id}/predictions'
+    else:
+        url = f'{deployment.prediction_environment["name"]}/predApi/v1.0/deployments/{deployment.id}/predictions'
     rsp = client.request(
         method='post',
-        url=f'{deployment.prediction_environment["name"]}/predApi/v1.0/deployments/{deployment.id}/predictions',
+        url=url,
         data=prediction_data.to_json(orient="records"),
         params={
             "maxExplanations": max_explanations,
