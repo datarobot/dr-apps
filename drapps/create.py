@@ -192,7 +192,11 @@ def wait_for_execution_environment_version_ready(
 
 
 def send_docker_image_with_progress(
-    session: Session, endpoint: str, base_env_id: str, docker_image: Path, field_name: str = 'docker_image'
+    session: Session,
+    endpoint: str,
+    base_env_id: str,
+    docker_image: Path,
+    field_name: str = 'docker_image',
 ) -> None:
     click.echo(f'Uploading {docker_image.name} to Data Robot.')
     with docker_image.open('rb') as file:

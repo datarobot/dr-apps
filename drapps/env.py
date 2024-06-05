@@ -41,7 +41,9 @@ from .helpers.wrappers import api_endpoint, api_token
     type=click.STRING,
     help='Description of the execution env to be created',
 )
-def create_env(token: str, endpoint: str, name: str, dockerfilezip: Path, description: Optional[str]) -> None:
+def create_env(
+    token: str, endpoint: str, name: str, dockerfilezip: Path, description: Optional[str]
+) -> None:
     """Creates an execution environment and a first version."""
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
@@ -58,6 +60,6 @@ def create_env(token: str, endpoint: str, name: str, dockerfilezip: Path, descri
         endpoint=endpoint,
         base_env_id=create_exec_env_rsp['id'],
         docker_image=dockerfilezip,
-        field_name='docker_context'
+        field_name='docker_context',
     )
     click.echo()
