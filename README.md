@@ -158,6 +158,29 @@ Argument                | Description
 `--token`               | Enter your API Key, found on the [**Developer Tools**](https://app.datarobot.com/account/developer-tools) page of your DataRobot account. <br> You can also provide your API Key using the `DATAROBOT_API_TOKEN` environment variable.
 `--endpoint`            | Enter the URL for the DataRobot Public API. The default value is `https://app.datarobot.com/api/v2`. <br> You can also provide the URL to Public API using the `DATAROBOT_ENDPOINT` environment variable.
 
+### Create a new Execution Environment
+It may be the case that your version of DataRobot (eg Single Tenant SAAS or On-Prem) was not shipped with the `[Experimental] Python 3.9 Streamlit`
+or that you want to make a new execution environment for your apps (eg you want to make a Flask app, or you want your base docker image
+to have some packages installed in it that don't come standard
+
+First you will need to make a dockerfile. For the default `[Experimental] Python 3.9 Streamlit` env we use:
+```dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+RUN pip3 install --no-cache-dir 'streamlit==1.17.0' 'datarobot==3.0.2' 'plotly==5.13.0' 'streamlit-wordcloud==0.1.0' 'kaleido==0.2.1' 'tabulate==0.9.0' 'altair<5'
+
+WORKDIR /opt/code
+
+EXPOSE 8080
+```
+That dockerfile will then need to be archived into a zip file. For this example we named the zip file `dockerfile.zip`.
+Once you have the file zipped, and you open a terminal in the directory you can use the apps CLI:
+```
+drapps create-env --dockerfilezip dockerfile.zip --name "[Experimental] Python 3.9 Streamlit"
+```
+
 ## Deploy an example app
 
 To test this, deploy an example Streamlit app using the following command from 
