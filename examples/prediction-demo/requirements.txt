@@ -1,7 +1,7 @@
 streamlit == 1.17.0
 pytest == 7.2.1
 responses==0.22.0
-datarobot==3.0.2
+datarobot==3.4.0
 plotly==5.13.0
 streamlit-wordcloud==0.1.0
 kaleido==0.2.1
