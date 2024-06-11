@@ -8,8 +8,8 @@ from dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_
     prediction_display_chart, experiment_container_overview_widget
 from dr_streamlit.datarobot_branding import datarobot_logo
 
-deployment_id = os.getenv('deploymentid')
-project_id = os.getenv('projectid')
+deployment_id = '6667241b342129060c48a0ea'
+project_id = '66671dcca05756cf887e74af'
 
 
 def intro():
@@ -106,15 +106,15 @@ def predictor_app():
 def main():
     try:
         c = Client(
-            token=os.getenv("token"),
-            endpoint=os.getenv('endpoint', 'https://app.datarobot.com/api/v2/')
+            token='NjY1ZjdiOTJmYjM5NzcyZmJjNWE5NWE4OldNMEovckZYMHZrYlJNMjI1MjF4eGlzUlZyMjZRUjZvajVEZFF5T0NWeDQ9',
+            endpoint='https://staging.datarobot.com/api/v2/'
         )
         set_client(c)
     except ValueError as e:
         st.error("Unable to setup local environment")
-        if not os.getenv('token'):
-            st.error("Please make sure the 'token' environment variable is set to be a valid token from your DataRobot account", icon='🔐')
-        elif str(e) == 'The client is not compatible with the server version':
+        # if not os.getenv('token'):
+        #     st.error("Please make sure the 'token' environment variable is set to be a valid token from your DataRobot account", icon='🔐')
+        if str(e) == 'The client is not compatible with the server version':
             st.error("""
             The token + endpoint pair provided is not valid.
             If you use eu datarobot, you will need to set 'endpoint' environment variable to

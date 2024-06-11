@@ -1,21 +1,27 @@
 from typing import Optional
 
 import pandas as pd
-from datarobot import Model, Project, TARGET_TYPE
+import plotly.graph_objects as go
+from datarobot import TARGET_TYPE, Model, Project
 
 from .predictor import get_distribution_chart_data
-import plotly.graph_objects as go
 
 
-def prediction_distribution_chart(project_id: str, model_id: str, prediction: float, specified_class: Optional[str] = None) -> go.Figure:
-    distribution_chart_data = get_distribution_chart_data(project_id, model_id, specified_class=specified_class)
+def prediction_distribution_chart(
+    project_id: str, model_id: str, prediction: float, specified_class: Optional[str] = None
+) -> go.Figure:
+    distribution_chart_data = get_distribution_chart_data(
+        project_id, model_id, specified_class=specified_class
+    )
     model = Model.get(project=project_id, model_id=model_id)
     prob_dist_df = pd.DataFrame.from_records(distribution_chart_data)
     project = Project.get(project_id)
     pred_max = prob_dist_df["total_freq"].max()
     fig = go.Figure()
     if project.target_type == TARGET_TYPE.BINARY:
-        midline_index = prob_dist_df.loc[prob_dist_df["bin"] <= model.prediction_threshold].index.max()
+        midline_index = prob_dist_df.loc[
+            prob_dist_df["bin"] <= model.prediction_threshold
+        ].index.max()
         fig.add_trace(
             go.Scatter(
                 y=list(prob_dist_df["bin"][: midline_index + 1]),
