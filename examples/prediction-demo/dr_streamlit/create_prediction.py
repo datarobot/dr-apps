@@ -25,7 +25,7 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
             'max': project_feature.max,
             'median': project_feature.median,
             'suspected_int': all(
-                type(f) == int
+                type(f) == int  # noqa: E721
                 for f in [project_feature.max, project_feature.min, project_feature.max]
             ),
         }
@@ -33,10 +33,7 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
             histogram = FeatureHistogram.get(project_id=project_id, feature_name=d_feature['name'])
             record['options'] = [option['label'] for option in histogram.plot]
         prediction_features.append(record)
-    if (
-        Deployment(deployment_id).get_association_id_settings()['required_in_prediction_requests']
-        == True
-    ):
+    if Deployment(deployment_id).get_association_id_settings()['required_in_prediction_requests']:
         association_id = Deployment(deployment_id).get_association_id_settings()['column_names'][0]
         record = {
             'name': association_id,
