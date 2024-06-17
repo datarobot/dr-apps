@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 import streamlit as st
-from datarobot import Project, TARGET_TYPE
+from datarobot import TARGET_TYPE, Project
 
-from .caches import initialize_and_get_feature_impact, get_project
+from .caches import get_project, initialize_and_get_feature_impact
 
 AGGREGATED_NAME = "Aggregated"
 
@@ -15,7 +15,9 @@ def _get_multiclass_names(project_id: str, model_id: str) -> List[str]:
     There is no multiclass names API, so we just have to get them from another API and
     discard unused data. This is cached, so it'll only be slow once though.
     """
-    feature_impact = initialize_and_get_feature_impact(project_id=project_id, model_id=model_id, use_multiclass=True)
+    feature_impact = initialize_and_get_feature_impact(
+        project_id=project_id, model_id=model_id, use_multiclass=True
+    )
     multiclass_names = [fi['class'] for fi in feature_impact]
     multiclass_names.append(AGGREGATED_NAME)
     return multiclass_names

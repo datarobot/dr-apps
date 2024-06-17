@@ -1,6 +1,5 @@
 import base64
-
-from typing import Dict, Any, List, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import plotly.io
@@ -14,6 +13,7 @@ from .feature_histogram import feature_histogram_chart
 class PredictionExplanationTableColors:
     POSITIVE_COLOR = 'red'
     NEGATIVE_COLOR = 'blue'
+
     @classmethod
     def qs_to_span(cls, qualitative_strength: str) -> Union[Tuple[str, str], Tuple[None, None]]:
         color = None
@@ -35,65 +35,81 @@ def plotly_to_b64_img(plot, width: Optional[int] = None, height: Optional[int] =
 
 
 def prediction_explanation_table(
-        pex: pd.DataFrame,
-        project_id: str,
-        model_id: str,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        bin_limit: Optional[int] = None,
+    pex: pd.DataFrame,
+    project_id: str,
+    model_id: str,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    bin_limit: Optional[int] = None,
 ) -> None:
     feature_values = []
     charts = []
     for row in pex.itertuples():
         if hasattr(row, 'per_ngram_text_explanations'):
-            feature_values.append(color_in_features(row.feature_value, row.per_ngram_text_explanations))
+            feature_values.append(
+                color_in_features(row.feature_value, row.per_ngram_text_explanations)
+            )
         else:
             feature_values.append(row.feature_value)
 
-        if type(row.feature) is not dict:
-            chart = feature_histogram_chart(project_id, row.feature, row.feature_value, bin_limit=bin_limit)
+        if not isinstance(row.feature, dict):
+            chart = feature_histogram_chart(
+                project_id, row.feature, row.feature_value, bin_limit=bin_limit
+            )
             charts.append(
-                "![default](data:image/png;base64," + plotly_to_b64_img(chart, height=height, width=width) + ')')
+                "![default](data:image/png;base64,"
+                + plotly_to_b64_img(chart, height=height, width=width)
+                + ')'
+            )
         else:
             charts.append('')
 
-    table = pd.DataFrame({
-        'Feature': pex['feature'],
-        'Value': feature_values,
-        'Strength': qualitative_strength_from_prediction_explanations(pex, project_id=project_id, model_id=model_id),
-        'Distribution': charts
-    })
+    table = pd.DataFrame(
+        {
+            'Feature': pex['feature'],
+            'Value': feature_values,
+            'Strength': qualitative_strength_from_prediction_explanations(
+                pex, project_id=project_id, model_id=model_id
+            ),
+            'Distribution': charts,
+        }
+    )
     st.markdown(table.to_markdown())
 
 
-def color_in_features(text_feature_value: str, per_ngram_text_explanations: List[Dict[str, Any]]) -> str:
+def color_in_features(
+    text_feature_value: str, per_ngram_text_explanations: List[Dict[str, Any]]
+) -> str:
     if not per_ngram_text_explanations:
         return text_feature_value
     all_ngrams = []
     for ngram_text_explanation in per_ngram_text_explanations:
         for ngram in ngram_text_explanation['ngrams']:
             all_ngrams.append(
-                {
-                    **ngram,
-                    'qualitative_strength': ngram_text_explanation['qualitative_strength']
-                }
+                {**ngram, 'qualitative_strength': ngram_text_explanation['qualitative_strength']}
             )
     all_ngrams.sort(key=lambda x: -x['ending_index'])
 
     for ngram in all_ngrams:
         start = ngram['starting_index']
         end = ngram['ending_index']
-        color_span, close_color_span = PredictionExplanationTableColors.qs_to_span(ngram['qualitative_strength'])
+        color_span, close_color_span = PredictionExplanationTableColors.qs_to_span(
+            ngram['qualitative_strength']
+        )
         if color_span:
-            text_feature_value = text_feature_value[:start] +\
-                                 color_span + text_feature_value[start:end] + close_color_span +\
-                                 text_feature_value[end:]
+            text_feature_value = (
+                text_feature_value[:start]
+                + color_span
+                + text_feature_value[start:end]
+                + close_color_span
+                + text_feature_value[end:]
+            )
 
     return text_feature_value
 
 
 def qualitative_strength_from_prediction_explanations(
-        pex: pd.DataFrame, project_id: str, model_id: str
+    pex: pd.DataFrame, project_id: str, model_id: str
 ) -> Series:
     """
     This covers the xemp qualitative strength defined in the DR Docs here:
@@ -115,21 +131,21 @@ def qualitative_strength_from_prediction_explanations(
         abs_strength = abs(strength)
 
         if len(features) == 1:
-            if abs_strength > .001:
+            if abs_strength > 0.001:
                 return '+++' if positive_strength else '---'
             else:
                 return ''
         if len(features) == 2:
             if abs_strength > 0.75:
                 return '+++' if positive_strength else '---'
-            elif abs_strength > .25:
+            elif abs_strength > 0.25:
                 return '++' if positive_strength else '--'
-            elif abs_strength > .001:
-                return '+' if positive_strength else'-'
+            elif abs_strength > 0.001:
+                return '+' if positive_strength else '-'
             else:
                 return ''
         if len(features) < 10:
-            if abs_strength > (2.0/len(features)):
+            if abs_strength > (2.0 / len(features)):
                 return '+++' if positive_strength else '---'
             elif abs_strength > 1.0 / (2.0 * len(features)):
                 return '++' if positive_strength else '--'
@@ -140,10 +156,10 @@ def qualitative_strength_from_prediction_explanations(
         if len(features) >= 10:
             if abs_strength > 0.2:
                 return '+++' if positive_strength else '---'
-            elif abs_strength > .05:
+            elif abs_strength > 0.05:
                 return '++' if positive_strength else '--'
-            elif abs_strength > .001:
-                return '+' if positive_strength else'-'
+            elif abs_strength > 0.001:
+                return '+' if positive_strength else '-'
             else:
                 return ''
 
@@ -151,4 +167,3 @@ def qualitative_strength_from_prediction_explanations(
         return '+' if positive_strength else '-'
 
     return pex['strength'].apply(strength_to_qualitative_strength)
-

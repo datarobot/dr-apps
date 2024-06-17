@@ -1,11 +1,12 @@
 import json
 import re
-from typing import List, Dict, Any, Optional, cast, Union
-import streamlit as st
+from typing import Any, Dict, List, Optional, Union, cast
+
 import numpy as np
 import pandas as pd
-from datarobot import Deployment, Project, TARGET_TYPE, BatchPredictionJob
-from datarobot.client import get_client, Client
+import streamlit as st
+from datarobot import TARGET_TYPE, BatchPredictionJob, Deployment, Project
+from datarobot.client import Client, get_client
 
 from .caches import get_model
 
@@ -16,11 +17,12 @@ def is_deployment_serverless(deployment: Deployment) -> bool:
     """
     return deployment.prediction_environment.get('platform') == 'datarobotServerless'
 
+
 @st.cache
 def submit_prediction(
-        deployment: Deployment,
-        prediction_data: pd.DataFrame,
-        max_explanations: Optional[int] = None,
+    deployment: Deployment,
+    prediction_data: pd.DataFrame,
+    max_explanations: Optional[int] = None,
 ):
     """
     The DataRobot python public API does not have a predict method,
@@ -31,7 +33,9 @@ def submit_prediction(
     headers = {
         "Content-Type": "application/json; charset=UTF-8",
         "Authorization": client.headers["Authorization"],
-        "DataRobot-Key": None if is_serverless else deployment.default_prediction_server['datarobot-key'],
+        "DataRobot-Key": (
+            None if is_serverless else deployment.default_prediction_server['datarobot-key']
+        ),
     }
 
     if is_serverless:
@@ -42,10 +46,7 @@ def submit_prediction(
         method='post',
         url=url,
         data=prediction_data.to_json(orient="records"),
-        params={
-            "maxExplanations": max_explanations,
-            "maxNgramExplanations": 'all'
-        },
+        params={"maxExplanations": max_explanations, "maxNgramExplanations": 'all'},
         headers=headers,
     )
     return _camelCase_keys_to_snake_case_keys(rsp.json())
@@ -72,9 +73,17 @@ def _camelCase_keys_to_snake_case_keys(data: Union[Dict[str, Any], List]):
     so that we can have parity with the Batch Prediction API.
     """
     if isinstance(data, list):
-        return [_camelCase_keys_to_snake_case_keys(i) if isinstance(i, (dict, list)) else i for i in data]
+        return [
+            _camelCase_keys_to_snake_case_keys(i) if isinstance(i, (dict, list)) else i
+            for i in data
+        ]
 
-    return {re.sub(r'(?<!^)(?=[A-Z])', '_', key).lower():_camelCase_keys_to_snake_case_keys(value) if isinstance(value, (dict, list)) else value for key, value in data.items()}
+    return {
+        re.sub(r'(?<!^)(?=[A-Z])', '_', key).lower(): (
+            _camelCase_keys_to_snake_case_keys(value) if isinstance(value, (dict, list)) else value
+        )
+        for key, value in data.items()
+    }
 
 
 @st.cache
@@ -91,49 +100,84 @@ def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explan
     for row in result.itertuples():
         record = dict()
         if project.target_type == TARGET_TYPE.BINARY:
-            record['prediction_values'] = [
-                {'value': getattr(row, f'{target}_{row.POSITIVE_CLASS}_PREDICTION'), 'label': project.positive_class}
-            ],
+            record['prediction_values'] = (
+                [
+                    {
+                        'value': getattr(row, f'{target}_{row.POSITIVE_CLASS}_PREDICTION'),
+                        'label': project.positive_class,
+                    }
+                ],
+            )
         elif project.target_type == TARGET_TYPE.REGRESSION:
             record['prediction'] = getattr(row, f'{target}_PREDICTION')
         else:
             raise ValueError("Target Type not supported")
         record['prediction_explanations'] = [
-                {
-                    'feature': getattr(row, f'EXPLANATION_{i}_FEATURE_NAME'),
-                    'feature_value': getattr(row, f'EXPLANATION_{i}_ACTUAL_VALUE'),
-                    'strength': getattr(row, f'EXPLANATION_{i}_STRENGTH'),
-                    'qualitative_strength': getattr(row, f'EXPLANATION_{i}_QUALITATIVE_STRENGTH'),
-                    'per_ngram_text_explanations': json.loads(getattr(row, f'EXPLANATION_{i}_TEXT_NGRAMS'))
-                } for i in range(1, max_explanations + 1) if (hasattr(row, f'EXPLANATION_{i}_FEATURE_NAME') and not pd.isna(getattr(row, f'EXPLANATION_{i}_FEATURE_NAME')))
-            ]
+            {
+                'feature': getattr(row, f'EXPLANATION_{i}_FEATURE_NAME'),
+                'feature_value': getattr(row, f'EXPLANATION_{i}_ACTUAL_VALUE'),
+                'strength': getattr(row, f'EXPLANATION_{i}_STRENGTH'),
+                'qualitative_strength': getattr(row, f'EXPLANATION_{i}_QUALITATIVE_STRENGTH'),
+                'per_ngram_text_explanations': json.loads(
+                    getattr(row, f'EXPLANATION_{i}_TEXT_NGRAMS')
+                ),
+            }
+            for i in range(1, max_explanations + 1)
+            if (
+                hasattr(row, f'EXPLANATION_{i}_FEATURE_NAME')
+                and not pd.isna(getattr(row, f'EXPLANATION_{i}_FEATURE_NAME'))
+            )
+        ]
         scored_predictions.append(record)
 
     return {'data': scored_predictions}
 
 
 @st.cache
-def get_distribution_chart_data(project_id: str, model_id: str, specified_class: Optional[str] = None):
+def get_distribution_chart_data(
+    project_id: str, model_id: str, specified_class: Optional[str] = None
+):
     project = Project.get(project_id=project_id)
     if project.target_type == TARGET_TYPE.BINARY:
-        roc_curve_rsp_json = _get_chart_from_model_or_parent(project_id=project_id, model_id=model_id, chart='rocCurve')
-        validation_chart = next(chart for chart in roc_curve_rsp_json['charts'] if chart['source'] == 'validation')
-        prediction_data = validation_chart['negativeClassPredictions'] + validation_chart['positiveClassPredictions']
+        roc_curve_rsp_json = _get_chart_from_model_or_parent(
+            project_id=project_id, model_id=model_id, chart='rocCurve'
+        )
+        validation_chart = next(
+            chart for chart in roc_curve_rsp_json['charts'] if chart['source'] == 'validation'
+        )
+        prediction_data = (
+            validation_chart['negativeClassPredictions']
+            + validation_chart['positiveClassPredictions']
+        )
         return _prediction_data_to_bins_for_binary(prediction_data)
     elif project.target_type == TARGET_TYPE.REGRESSION:
-        lift_chart_rsp_json = _get_chart_from_model_or_parent(project_id=project_id, model_id=model_id, chart='liftChart')
-        validation_chart = next(chart for chart in lift_chart_rsp_json['charts'] if chart['source'] == 'validation')
-        return _prediction_data_to_bins_for_regression(unnormalize_prediction(validation_chart['bins']))
+        lift_chart_rsp_json = _get_chart_from_model_or_parent(
+            project_id=project_id, model_id=model_id, chart='liftChart'
+        )
+        validation_chart = next(
+            chart for chart in lift_chart_rsp_json['charts'] if chart['source'] == 'validation'
+        )
+        return _prediction_data_to_bins_for_regression(
+            unnormalize_prediction(validation_chart['bins'])
+        )
     elif project.target_type == TARGET_TYPE.MULTICLASS:
-        multiclass_chart_rsp = _get_chart_from_model_or_parent(project_id=project_id, model_id=model_id, chart='multiclassLiftChart')
-        validation_chart = next(chart for chart in multiclass_chart_rsp['charts'] if chart['source'] == 'validation')
-        specified_class_bin = next(class_bin['bins'] for class_bin in validation_chart['classBins'] if class_bin['targetClass'] == specified_class)
+        multiclass_chart_rsp = _get_chart_from_model_or_parent(
+            project_id=project_id, model_id=model_id, chart='multiclassLiftChart'
+        )
+        validation_chart = next(
+            chart for chart in multiclass_chart_rsp['charts'] if chart['source'] == 'validation'
+        )
+        specified_class_bin = next(
+            class_bin['bins']
+            for class_bin in validation_chart['classBins']
+            if class_bin['targetClass'] == specified_class
+        )
         return _prediction_data_to_bins_for_regression(unnormalize_prediction(specified_class_bin))
     raise ValueError(f'{project.target_type} is not supported')
 
 
 def _prediction_data_to_bins_for_binary(
-        prob_data: List[float], bins_num: int = 20
+    prob_data: List[float], bins_num: int = 20
 ) -> List[Dict[str, Any]]:
     """
     Converts list with probabilities to bins with distribution data of
@@ -168,7 +212,7 @@ def _prediction_data_to_bins_for_binary(
 
 
 def _prediction_data_to_bins_for_regression(
-        prediction_data: List[float], bins_num: int = 20
+    prediction_data: List[float], bins_num: int = 20
 ) -> List[Dict[str, List[float]]]:
     """
     Counts distribution of prediction data.
