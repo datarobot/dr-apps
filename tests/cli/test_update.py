@@ -43,23 +43,38 @@ def test_update_app(
             json={'count': 1, 'data': [{'id': str(app_id), 'name': old_name}]},
             match=[auth_matcher, params_matcher],
         )
-    if change.get('sourceApp') and not ObjectId.is_valid(change['sourceApp']):
-        app_list_url = f'{api_endpoint_env}/customApplications/'
+    if change.get('sourceApp'):
         # check that name filter was used
-        params_matcher = matchers.query_param_matcher({'name': change['sourceApp']})
-        responses.get(
-            app_list_url,
-            json={'count': 1, 'data': [{'id': str(src_app_id), 'name': change['sourceApp']}]},
-            match=[auth_matcher, params_matcher],
-        )
-
+        new_custom_application_source_version_id = ObjectId()
+        new_custom_application_source_id = ObjectId()
+        app_rsp = {
+                'id': str(src_app_id),
+                'customApplicationSourceVersionId': str(new_custom_application_source_version_id),
+                'customApplicationSourceId': str(new_custom_application_source_id),
+            }
+        if ObjectId.is_valid(change['sourceApp']):
+            responses.get(
+                f'{api_endpoint_env}/customApplications/{src_app_id}/',
+                json=app_rsp,
+                match=[auth_matcher],
+            )
+        else:
+            app_list_url = f'{api_endpoint_env}/customApplications/'
+            params_matcher = matchers.query_param_matcher({'name': change['sourceApp']})
+            app_rsp['name'] = change['sourceApp']
+            responses.get(
+                app_list_url,
+                json={'count': 1, 'data': [app_rsp]},
+                match=[auth_matcher, params_matcher],
+            )
     cli_args = ['-i', old_name if use_name_for_src_app else app_id]
     expected_payload = {}
     if 'name' in change:
         expected_payload['name'] = change['name']
         cli_args.extend(['--name', change["name"]])
     if 'sourceApp' in change:
-        expected_payload['sourceApplicationId'] = str(src_app_id)
+        expected_payload['customApplicationSourceVersionId'] = str(new_custom_application_source_version_id)
+        expected_payload['customApplicationSourceId'] = str(new_custom_application_source_id)
         cli_args.extend(['-s', change["sourceApp"]])
 
     app_url = f'{api_endpoint_env}/customApplications/{app_id}/'
