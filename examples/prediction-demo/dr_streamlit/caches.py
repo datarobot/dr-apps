@@ -1,7 +1,7 @@
-from typing import List, Dict, Any, Union
+from typing import Any, Dict, List, Union
 
 import streamlit as st
-from datarobot import Project, Model, Deployment, FeatureImpactJob
+from datarobot import Deployment, FeatureImpactJob, Model, Project
 from datarobot.errors import ClientError
 
 
@@ -26,7 +26,9 @@ def get_model_features(project_id: str, model_id: str) -> List[str]:
 
 
 @st.cache
-def initialize_and_get_feature_impact(project_id: str, model_id: str, use_multiclass: bool) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+def initialize_and_get_feature_impact(
+    project_id: str, model_id: str, use_multiclass: bool
+) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
     model = Model(id=model_id, project_id=project_id)
 
     def get_feature_impact():

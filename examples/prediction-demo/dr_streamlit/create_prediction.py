@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import pandas
 import streamlit as st
 from datarobot import Deployment, FeatureHistogram, Project
 
-from .predictor import submit_prediction, submit_batch_prediction
+from .predictor import submit_batch_prediction, submit_prediction
 
 
 @st.cache
@@ -14,7 +14,9 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
     project_features = Project(project_id).get_features()
     prediction_features = list()
     for d_feature in deployment_features:
-        project_feature = next(p_feature for p_feature in project_features if p_feature.name == d_feature['name'])
+        project_feature = next(
+            p_feature for p_feature in project_features if p_feature.name == d_feature['name']
+        )
         record = {
             'name': d_feature['name'],
             'feature_type': d_feature['feature_type'],
@@ -23,8 +25,9 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
             'max': project_feature.max,
             'median': project_feature.median,
             'suspected_int': all(
-                type(f) == int for f in [project_feature.max, project_feature.min, project_feature.max]
-            )
+                isinstance(f, int)
+                for f in [project_feature.max, project_feature.min, project_feature.max]
+            ),
         }
         if d_feature['feature_type'] == 'Categorical':
             histogram = FeatureHistogram.get(project_id=project_id, feature_name=d_feature['name'])
@@ -35,11 +38,11 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
 
 
 def create_prediction_form(
-        deployment: Deployment,
-        project_id: str,
-        use_batch_prediction_api=False,
-        n_cols=4,
-        max_explanations=12
+    deployment: Deployment,
+    project_id: str,
+    use_batch_prediction_api=False,
+    n_cols=4,
+    max_explanations=12,
 ):
     feats = get_prediction_features(project_id, deployment.id)
     pred = dict(index=[0])
@@ -53,7 +56,7 @@ def create_prediction_form(
                     pred[f['name']] = st.number_input(
                         f['name'],
                         value=int(f['median']) if f['suspected_int'] else float(f['median']),
-                        step=1 if f['suspected_int'] else 0.01
+                        step=1 if f['suspected_int'] else 0.01,
                     )
                 elif f['feature_type'] == "Categorical":
                     pred[f['name']] = st.selectbox(f['name'], options=f['options'])
@@ -65,13 +68,17 @@ def create_prediction_form(
                 elif f['feature_type'] == 'Percentage':
                     pred[f['name']] = st.text_input(
                         f['name'],
-                        value= f['median'],
+                        value=f['median'],
                     )
 
         # Now add a submit button to the form:
         v = st.form_submit_button("Submit")
         if v:
             if use_batch_prediction_api:
-                return submit_batch_prediction(deployment, pandas.DataFrame.from_dict(pred), max_explanations)
+                return submit_batch_prediction(
+                    deployment, pandas.DataFrame.from_dict(pred), max_explanations
+                )
             else:
-                return submit_prediction(deployment, pandas.DataFrame.from_dict(pred), max_explanations)
+                return submit_prediction(
+                    deployment, pandas.DataFrame.from_dict(pred), max_explanations
+                )

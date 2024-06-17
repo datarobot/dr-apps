@@ -6,9 +6,10 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import os
+from urllib.parse import urlparse
+
 import streamlit as st
 from datarobot import Deployment
-from urllib.parse import urlparse
 
 
 def _make_deployment_link(parsed_url, deployment):

@@ -1,9 +1,9 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 import pandas as pd
-from datarobot import FeatureHistogram
-import streamlit as st
 import plotly.express as px
+import streamlit as st
+from datarobot import FeatureHistogram
 
 
 @st.cache
@@ -13,12 +13,12 @@ def get_feature_histogram_data(project_id: str, feature_name: str, bin_limit: Op
 
 
 def feature_histogram_chart(
-        project_id: str,
-        feature_name: str,
-        fill_target: Optional[Any] = None,
-        default_color: str = 'blue',
-        fill_target_color: str = 'red',
-        bin_limit: Optional[int] = None,
+    project_id: str,
+    feature_name: str,
+    fill_target: Optional[Any] = None,
+    default_color: str = 'blue',
+    fill_target_color: str = 'red',
+    bin_limit: Optional[int] = None,
 ):
     """
 
