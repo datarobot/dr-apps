@@ -52,7 +52,7 @@ def prediction_explanation_table(
         else:
             feature_values.append(row.feature_value)
 
-        if type(row.feature) is not dict:  # noqa: E721
+        if not isinstance(row.feature, dict):
             chart = feature_histogram_chart(
                 project_id, row.feature, row.feature_value, bin_limit=bin_limit
             )

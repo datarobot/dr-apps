@@ -25,7 +25,7 @@ def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[st
             'max': project_feature.max,
             'median': project_feature.median,
             'suspected_int': all(
-                type(f) == int  # noqa: E721
+                isinstance(f, int)
                 for f in [project_feature.max, project_feature.min, project_feature.max]
             ),
         }
