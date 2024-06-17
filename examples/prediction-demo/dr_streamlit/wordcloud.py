@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import plotly
 import streamlit as st
@@ -11,10 +11,9 @@ from .select_box import AGGREGATED_NAME
 
 
 def _get_word_cloud_data(project_id, model_id, exclude_stop_words=False) -> WordCloud:
-    return Model(
-        id=model_id,
-        project_id=project_id
-    ).get_word_cloud(exclude_stop_words=exclude_stop_words)
+    return Model(id=model_id, project_id=project_id).get_word_cloud(
+        exclude_stop_words=exclude_stop_words
+    )
 
 
 def _color(coefficent, scales):
@@ -35,7 +34,7 @@ def wordcloud_chart(
     specified_class: Optional[str] = None,
     selected_feature: Optional[str] = None,
     exclude_stop_words: bool = False,
-    top_values: Optional[int] = None
+    top_values: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
 
@@ -48,7 +47,9 @@ def wordcloud_chart(
     :return:
     """
     try:
-        word_cloud_object: WordCloud = _get_word_cloud_data(project_id=project_id, model_id=model_id, exclude_stop_words=exclude_stop_words)
+        word_cloud_object: WordCloud = _get_word_cloud_data(
+            project_id=project_id, model_id=model_id, exclude_stop_words=exclude_stop_words
+        )
     except ClientError as ce:
         if ce.json['message'] == 'No word cloud data was found for this model':
             st.text('This model does not support word cloud')
@@ -57,21 +58,33 @@ def wordcloud_chart(
     if specified_class != AGGREGATED_NAME and specified_class:
         word_cloud_object = WordCloud(word_cloud_object.ngrams_per_class()[specified_class])
     if selected_feature != AGGREGATED_NAME and selected_feature:
-        word_cloud_object.ngrams = filter(lambda d: d['variable'] in [f'NGRAM_OCCUR_L2_{selected_feature}', selected_feature], word_cloud_object.ngrams)
+        word_cloud_object.ngrams = filter(
+            lambda d: d['variable'] in [f'NGRAM_OCCUR_L2_{selected_feature}', selected_feature],
+            word_cloud_object.ngrams,
+        )
 
     if top_values:
         word_cloud_object = WordCloud(word_cloud_object.most_important(top_values))
 
-    words = [dict(
-        text=ngram['ngram'],
-        value=ngram['count'],
-        color=_color(ngram['coefficient'], scales=plotly.colors.PLOTLY_SCALES["RdBu"]),
-        frequency=ngram['frequency'],
-        coefficient=ngram['coefficient'],
-    ) for ngram in word_cloud_object.ngrams]
-    chart = wordcloud.visualize(words, tooltip_data_fields={
-        'text': 'ngram', 'value': 'count', 'frequency': 'frequency', 'coefficient': 'coefficient'
-    }, per_word_coloring=True, key=f'WordCloud{project_id}{model_id}{specified_class}{selected_feature}')
+    words = [
+        dict(
+            text=ngram['ngram'],
+            value=ngram['count'],
+            color=_color(ngram['coefficient'], scales=plotly.colors.PLOTLY_SCALES["RdBu"]),
+            frequency=ngram['frequency'],
+            coefficient=ngram['coefficient'],
+        )
+        for ngram in word_cloud_object.ngrams
+    ]
+    chart = wordcloud.visualize(
+        words,
+        tooltip_data_fields={
+            'text': 'ngram',
+            'value': 'count',
+            'frequency': 'frequency',
+            'coefficient': 'coefficient',
+        },
+        per_word_coloring=True,
+        key=f'WordCloud{project_id}{model_id}{specified_class}{selected_feature}',
+    )
     return chart
-
-

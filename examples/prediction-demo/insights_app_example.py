@@ -1,13 +1,19 @@
 import os
+
 from datarobot import Client
 from datarobot.client import set_client
-from dr_streamlit import multiclass_dropdown_menu, derived_features_chart, text_feature_dropdown_menu, project_model_dropdown, wordcloud_chart
-
+from dr_streamlit import (
+    derived_features_chart,
+    multiclass_dropdown_menu,
+    project_model_dropdown,
+    text_feature_dropdown_menu,
+    wordcloud_chart,
+)
 
 if __name__ == '__main__':
     c = Client(
         token=os.getenv("token"),
-        endpoint=os.getenv('endpoint', 'https://app.datarobot.com/api/v2/')
+        endpoint=os.getenv('endpoint', 'https://app.datarobot.com/api/v2/'),
     )
     set_client(c)
 
@@ -21,8 +27,4 @@ if __name__ == '__main__':
         specified_class=selected_class,
         selected_feature=selected_feature,
     )
-    derived_features_chart(
-        project_id=project_id,
-        model_id=model_id,
-        selected_class=selected_class
-    )
+    derived_features_chart(project_id=project_id, model_id=model_id, selected_class=selected_class)

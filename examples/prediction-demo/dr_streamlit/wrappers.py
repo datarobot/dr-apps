@@ -8,4 +8,5 @@ def chart_with_error_backup(chart_func):
             return chart_func(*args, **kwargs)
         except ClientError as ce:
             return st.error(ce.json['message'])
+
     return wrapper
