@@ -22,7 +22,7 @@ import responses
 @click.option(
     '-i',
     '--application-to-be-updated',
-    required=False,
+    required=True,
     type=click.STRING,
     help='Name or ID for the application to update.',
 )
@@ -40,7 +40,7 @@ import responses
     type=click.STRING,
     help='Name or ID for the application to copy the application from.',
 )
-def update(
+def publish(
     application_to_be_updated: str,
     token: str,
     endpoint: str,
@@ -65,7 +65,6 @@ def update(
         else:
             app = get_custom_app_by_name(session, endpoint, app_name=source_application)
         payload['customApplicationSourceVersionId'] = app['customApplicationSourceVersionId']
-        payload['customApplicationSourceId'] = app['customApplicationSourceId']
 
     if name:
         payload['name'] = name

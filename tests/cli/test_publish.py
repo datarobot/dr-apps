@@ -6,7 +6,8 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 
-import json
+
+import logging
 
 import pytest
 import responses
@@ -14,7 +15,7 @@ from bson import ObjectId
 from click.testing import CliRunner
 from responses import matchers
 
-from drapps.update import update
+from drapps.publish import publish
 
 
 @responses.activate
@@ -30,10 +31,11 @@ from drapps.update import update
     ],
 )
 @pytest.mark.parametrize('use_name_for_src_app', (False, True))
-def test_update_app(
+def test_publish_app(
     old_name, change, use_name_for_src_app, api_token_env, api_endpoint_env, app_id, src_app_id
 ):
     auth_matcher = matchers.header_matcher({'Authorization': f'Bearer {api_token_env}'})
+    new_custom_application_source_version_id = None
     if use_name_for_src_app:
         app_list_url = f'{api_endpoint_env}/customApplications/'
         # check that name filter was used
@@ -46,11 +48,9 @@ def test_update_app(
     if change.get('sourceApp'):
         # check that name filter was used
         new_custom_application_source_version_id = ObjectId()
-        new_custom_application_source_id = ObjectId()
         app_rsp = {
                 'id': str(src_app_id),
                 'customApplicationSourceVersionId': str(new_custom_application_source_version_id),
-                'customApplicationSourceId': str(new_custom_application_source_id),
             }
         if ObjectId.is_valid(change['sourceApp']):
             responses.get(
@@ -74,7 +74,6 @@ def test_update_app(
         cli_args.extend(['--name', change["name"]])
     if 'sourceApp' in change:
         expected_payload['customApplicationSourceVersionId'] = str(new_custom_application_source_version_id)
-        expected_payload['customApplicationSourceId'] = str(new_custom_application_source_id)
         cli_args.extend(['-s', change["sourceApp"]])
 
     app_url = f'{api_endpoint_env}/customApplications/{app_id}/'
@@ -83,5 +82,10 @@ def test_update_app(
     )
 
     runner = CliRunner()
-    result = runner.invoke(update, cli_args)
+    result = runner.invoke(publish, cli_args)
+    logger = logging.getLogger()
+    if result.exit_code:
+        logger.error(result.output)
+    else:
+        logger.info(result.output)
     assert result.exit_code == 0, result.exception
