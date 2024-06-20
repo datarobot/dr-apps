@@ -49,9 +49,9 @@ def test_publish_app(
         # check that name filter was used
         new_custom_application_source_version_id = ObjectId()
         app_rsp = {
-                'id': str(src_app_id),
-                'customApplicationSourceVersionId': str(new_custom_application_source_version_id),
-            }
+            'id': str(src_app_id),
+            'customApplicationSourceVersionId': str(new_custom_application_source_version_id),
+        }
         if ObjectId.is_valid(change['sourceApp']):
             responses.get(
                 f'{api_endpoint_env}/customApplications/{src_app_id}/',
@@ -73,7 +73,9 @@ def test_publish_app(
         expected_payload['name'] = change['name']
         cli_args.extend(['--name', change["name"]])
     if 'sourceApp' in change:
-        expected_payload['customApplicationSourceVersionId'] = str(new_custom_application_source_version_id)
+        expected_payload['customApplicationSourceVersionId'] = str(
+            new_custom_application_source_version_id
+        )
         cli_args.extend(['-s', change["sourceApp"]])
 
     app_url = f'{api_endpoint_env}/customApplications/{app_id}/'

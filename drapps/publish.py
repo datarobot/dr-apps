@@ -11,10 +11,13 @@ import click
 from bson import ObjectId
 from requests import Session
 
-from drapps.helpers.custom_apps_functions import get_custom_app_by_name, update_running_custom_app, get_custom_app_by_id
+from drapps.helpers.custom_apps_functions import (
+    get_custom_app_by_id,
+    get_custom_app_by_name,
+    update_running_custom_app,
+)
 from drapps.helpers.wrappers import api_endpoint, api_token
-from drapps.terminate import RequiredStringsFromParamsAndStdin
-import responses
+
 
 @click.command()
 @api_token

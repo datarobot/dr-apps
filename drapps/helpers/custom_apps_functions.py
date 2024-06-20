@@ -61,7 +61,9 @@ def get_custom_app_by_name(session: Session, endpoint: str, app_name: str) -> Di
         # imitating that app is not found
         error_url = posixpath.join(endpoint, 'customApplications/')
         raise ClientResponseError(
-            status=404, message=f'Can\'t find custom application "{app_name}" by name.', url=error_url
+            status=404,
+            message=f'Can\'t find custom application "{app_name}" by name.',
+            url=error_url,
         )
     return apps[0]
 

@@ -12,8 +12,8 @@ from drapps.create import create
 from drapps.env import create_env
 from drapps.logs import logs
 from drapps.ls import ls
-from drapps.terminate import terminate
 from drapps.publish import publish
+from drapps.terminate import terminate
 
 help_text = (
     'CLI tools for custom applications.\n\n'
