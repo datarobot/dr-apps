@@ -61,7 +61,9 @@ def get_custom_app_by_name(session: Session, endpoint: str, app_name: str) -> Di
         # imitating that app is not found
         error_url = posixpath.join(endpoint, 'customApplications/')
         raise ClientResponseError(
-            status=404, message='Can\'t find custom application by name.', url=error_url
+            status=404,
+            message=f'Can\'t find custom application "{app_name}" by name.',
+            url=error_url,
         )
     return apps[0]
 
@@ -96,3 +98,12 @@ def check_starting_status(session: Session, status_url: str) -> str:
     # redirection also mean that app was started successfully
     status = 'COMPLETED' if response.status_code == 303 else response.json()['status']
     return status
+
+
+def update_running_custom_app(
+    session: Session, app_id: str, endpoint: str, payload: Dict[str, Any]
+) -> None:
+    """Updates a running custom app's name / active app/ etc"""
+    url = posixpath.join(endpoint, f'customApplications/{app_id}/')
+    response = session.patch(url, json=payload)
+    handle_dr_response(response)
