@@ -95,11 +95,6 @@ pipeline:
                         shell: Sh
                         command: |-
                           make test
-                        reports:
-                          type: JUnit
-                          spec:
-                            paths:
-                              - /harness/results.xml
                         resources:
                           limits:
                             memory: 2Gi
