@@ -32,6 +32,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       set -ex
+                      echo *
                       make req-test
                     resources:
                       limits:
