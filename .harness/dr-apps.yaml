@@ -66,6 +66,7 @@ pipeline:
                         shell: Sh
                         command: |-
                           set -ex
+                          echo *
                           make lint
                         resources:
                           limits:
@@ -98,6 +99,7 @@ pipeline:
                         shell: Sh
                         command: |-
                           set -ex
+                          echo *
                           make test
                         reports:
                           type: JUnit
