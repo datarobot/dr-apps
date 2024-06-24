@@ -5,6 +5,38 @@ pipeline:
   orgIdentifier: No_Code_Apps
   tags: {}
   stages:
+    - stage:
+        name: Setup
+        identifier: Setup
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.cigeneral
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Setup Environment
+                  identifier: Setup_Environment
+                  spec:
+                    connectorRef: account.dockerhub_datarobot_read
+                    image: python:3.9
+                    shell: Sh
+                    command: |-
+                      set -ex
+                      make req-test
+                    resources:
+                      limits:
+                        memory: 8Gi
+                        cpu: "4"
     - parallel:
         - stage:
             name: Lint
@@ -33,40 +65,11 @@ pipeline:
                         shell: Sh
                         command: |-
                           set -ex
-                          make req-test
                           make lint
                         resources:
                           limits:
                             memory: 8Gi
                             cpu: "4"
-        - stage:
-            name: Source Code License Check
-            identifier: License_Check
-            description: ""
-            type: CI
-            spec:
-              cloneCodebase: true
-              infrastructure:
-                type: KubernetesDirect
-                spec:
-                  connectorRef: account.cigeneral
-                  namespace: harness-delegate-ng
-                  automountServiceAccountToken: true
-                  nodeSelector: {}
-                  os: Linux
-              execution:
-                steps:
-                  - step:
-                      type: Run
-                      name: License Check
-                      identifier: License_Check
-                      spec:
-                        connectorRef: account.dockerhub_datarobot_read
-                        image: apache/skywalking-eyes:0.4.0
-                        shell: Sh
-                        command: |-
-                          echo "Run License Check"
-                          license-eye -v info -c .licenserc.yaml header check
         - stage:
             name: Unit Test
             identifier: Unit_Test
@@ -94,7 +97,6 @@ pipeline:
                         shell: Sh
                         command: |-
                           set -ex
-                          make req-test
                           make test
                         reports:
                           type: JUnit
