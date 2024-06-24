@@ -2,7 +2,7 @@ inputSet:
   name: dr-apps test input
   identifier: dr_apps_test_input
   orgIdentifier: No_Code_Apps
-  projectIdentifier: ai_application_engine
+  projectIdentifier: customappswebsocketproxy
   pipeline:
     identifier: drapps
     properties:

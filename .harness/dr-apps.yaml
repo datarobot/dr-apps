@@ -1,7 +1,7 @@
 pipeline:
   name: dr-apps
   identifier: drapps
-  projectIdentifier: ai_application_engine
+  projectIdentifier: customappswebsocketproxy
   orgIdentifier: No_Code_Apps
   tags: {}
   stages:
@@ -37,8 +37,8 @@ pipeline:
                           make lint
                         resources:
                           limits:
-                            memory: 8Gi
-                            cpu: "4"
+                            memory: 2Gi
+                            cpu: "1"
         - stage:
             name: Unit Test
             identifier: Unit_Test
@@ -72,28 +72,6 @@ pipeline:
                           limits:
                             memory: 2Gi
                             cpu: "1"
-    - stage:
-        name: AllExpectedTasks
-        identifier: AllExpectedTasks
-        description: ""
-        type: CI
-        spec:
-          cloneCodebase: false
-          infrastructure:
-            useFromStage: Lint
-          execution:
-            steps:
-              - step:
-                  type: Run
-                  name: AllExpectedTasks
-                  identifier: AllExpectedTasks
-                  spec:
-                    connectorRef: account.dockerhub_datarobot_read
-                    image: node:20.11.1
-                    shell: Sh
-                    command: exit 0
-        when:
-          pipelineStatus: Success
   properties:
     ci:
       codebase:
