@@ -31,8 +31,6 @@ pipeline:
                     image: python:3.9
                     shell: Sh
                     command: |-
-                      set -ex
-                      echo *
                       make req-test
                     resources:
                       limits:
@@ -65,8 +63,6 @@ pipeline:
                         image: python:3.9
                         shell: Sh
                         command: |-
-                          set -ex
-                          echo *
                           make lint
                         resources:
                           limits:
@@ -98,8 +94,6 @@ pipeline:
                         image: python:3.9
                         shell: Sh
                         command: |-
-                          set -ex
-                          echo *
                           make test
                         reports:
                           type: JUnit
