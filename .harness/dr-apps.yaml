@@ -6,37 +6,6 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: Print PWD
-        identifier: pwd
-        description: ""
-        type: CI
-        spec:
-          cloneCodebase: true
-          infrastructure:
-            type: KubernetesDirect
-            spec:
-              connectorRef: account.cigeneral
-              namespace: harness-delegate-ng
-              automountServiceAccountToken: true
-              nodeSelector: {}
-              os: Linux
-          execution:
-            steps:
-              - step:
-                  type: Run
-                  name: Print PWD
-                  identifier: pwd
-                  spec:
-                    connectorRef: account.dockerhub_datarobot_read
-                    image: python:3.9
-                    shell: Sh
-                    command: |-
-                      echo "$PWD"
-                    resources:
-                      limits:
-                        memory: 8Gi
-                        cpu: "4"
-    - stage:
         name: Setup
         identifier: Setup
         description: ""
@@ -134,8 +103,6 @@ pipeline:
                           spec:
                             paths:
                               - /harness/results.xml
-                        envVariables:
-                          PYTEST_FLAGS: "--junitxml=results.xml"
                         resources:
                           limits:
                             memory: 2Gi
