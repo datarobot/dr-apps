@@ -55,7 +55,7 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
     else:
         expected_output = (
             'id                        name    status    updated     URL\n'
-            '------------------------  ------  --------  ----------  ---------------------------------------------------------\n'
+            '------------------------  ------  --------  ----------  ----------------------------------------------------------\n'
             '65980d79eea4fd0eddd59bba  App 1   running   11:59:59    http://ho.st/custom_applications/65980d79eea4fd0eddd59bba/\n'
             '659964182522de6a026de5cd  App 2   running   2023-11-12  http://ho.st/custom_applications/659964182522de6a026de5cd/\n'
             '659964382522de6a026de5ce  App 3   running   2024-01-28  http://ho.st/custom_applications/659964382522de6a026de5ce/\n'
