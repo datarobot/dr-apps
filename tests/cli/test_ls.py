@@ -110,7 +110,7 @@ def test_ls_envs(api_endpoint_env, api_token_env, ids_only):
     else:
         expected_output = (
             'id                        name    description\n'
-            '------------------------  ------  --------------\n'
+            '------------------------  ------  -------------\n'
             '659966682522de6a026de5d2  Env 1   First example\n'
             '659966682522de6a026de5d3  Env 2   Second example\n'
             '659966682522de6a026de5d4  Env 3   Third example\n'
