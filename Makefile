@@ -12,13 +12,13 @@ req-test:
 test:
 	py.test -sv tests/
 
-black:
+black-run:
 	black ./bin ./drapps ./tests -S -l 100
 
 black-check:
 	black ./bin ./drapps ./tests -S --check -l 100
 
-isort:
+isort-run:
 	isort ./bin ./drapps ./tests
 
 isort-check:

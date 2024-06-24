@@ -31,6 +31,7 @@ pipeline:
                     image: python:3.9
                     shell: Sh
                     command: |-
+                      set -x
                       make req-test
                     resources:
                       limits:
@@ -63,6 +64,7 @@ pipeline:
                         image: python:3.9
                         shell: Sh
                         command: |-
+                          set -x
                           make lint
                         resources:
                           limits:
@@ -94,6 +96,7 @@ pipeline:
                         image: python:3.9
                         shell: Sh
                         command: |-
+                          set -x
                           make test
                         resources:
                           limits:
