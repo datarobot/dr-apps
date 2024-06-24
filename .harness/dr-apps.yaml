@@ -5,38 +5,6 @@ pipeline:
   orgIdentifier: No_Code_Apps
   tags: {}
   stages:
-#    - stage:
-#        name: Setup
-#        identifier: Setup
-#        description: ""
-#        type: CI
-#        spec:
-#          cloneCodebase: true
-#          infrastructure:
-#            type: KubernetesDirect
-#            spec:
-#              connectorRef: account.cigeneral
-#              namespace: harness-delegate-ng
-#              automountServiceAccountToken: true
-#              nodeSelector: {}
-#              os: Linux
-#          execution:
-#            steps:
-#              - step:
-#                  type: Run
-#                  name: Setup Environment
-#                  identifier: Setup_Environment
-#                  spec:
-#                    connectorRef: account.dockerhub_datarobot_read
-#                    image: python:3.9
-#                    shell: Sh
-#                    command: |-
-#                      set -x
-#                      make req-test
-#                    resources:
-#                      limits:
-#                        memory: 8Gi
-#                        cpu: "4"
     - parallel:
         - stage:
             name: Lint
