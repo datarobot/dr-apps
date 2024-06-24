@@ -43,7 +43,7 @@ pipeline:
             description: ""
             type: CI
             spec:
-              cloneCodebase: true
+#              cloneCodebase: true
               infrastructure:
                 type: KubernetesDirect
                 spec:
@@ -74,7 +74,7 @@ pipeline:
             description: ""
             type: CI
             spec:
-              cloneCodebase: true
+#              cloneCodebase: true
               infrastructure:
                 type: KubernetesDirect
                 spec:
