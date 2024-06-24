@@ -1,0 +1,137 @@
+pipeline:
+  name: dr-apps
+  identifier: drapps
+  projectIdentifier: ai_application_engine
+  orgIdentifier: No_Code_Apps
+  tags: {}
+  stages:
+    - parallel:
+        - stage:
+            name: Lint
+            identifier: Lint
+            description: ""
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: Lint
+                      identifier: Run_Lint
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: python:3.9
+                        shell: Sh
+                        command: |-
+                          set -ex
+                          make req-test
+                          make lint
+                        resources:
+                          limits:
+                            memory: 8Gi
+                            cpu: "4"
+        - stage:
+            name: Source Code License Check
+            identifier: License_Check
+            description: ""
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: License Check
+                      identifier: License_Check
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: apache/skywalking-eyes:0.4.0
+                        shell: Sh
+                        command: |-
+                          echo "Run License Check"
+                          license-eye -v info -c .licenserc.yaml header check
+        - stage:
+            name: Unit Test
+            identifier: Unit_Test
+            description: ""
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: Run Unit Tests
+                      identifier: Tests
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: python:3.9
+                        shell: Sh
+                        command: |-
+                          set -ex
+                          make req-test
+                          make test
+                        reports:
+                          type: JUnit
+                          spec:
+                            paths:
+                              - /harness/results.xml
+                        envVariables:
+                          PYTEST_FLAGS: "--junitxml=results.xml"
+                        resources:
+                          limits:
+                            memory: 2Gi
+                            cpu: "1"
+    - stage:
+        name: AllExpectedTasks
+        identifier: AllExpectedTasks
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            useFromStage: Lint
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: AllExpectedTasks
+                  identifier: AllExpectedTasks
+                  spec:
+                    connectorRef: account.dockerhub_datarobot_read
+                    image: node:20.11.1
+                    shell: Sh
+                    command: exit 0
+        when:
+          pipelineStatus: Success
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.svc_harness_git1
+        repoName: dr-apps
+        build: <+input>
