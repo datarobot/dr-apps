@@ -23,7 +23,6 @@ project_id = os.getenv('projectid')
 
 
 def intro():
-
     st.write("# Welcome to DataRobot's Streamlit package! 👋")
     st.sidebar.success("Select a demo above.")
 
