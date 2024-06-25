@@ -9,12 +9,13 @@ from dr_streamlit import (
     derived_features_chart,
     experiment_container_overview_widget,
     get_deployment,
+text_feature_dropdown_menu,
+    wordcloud_chart,
     get_project,
     multiclass_dropdown_menu,
     prediction_display_chart,
     project_model_dropdown,
-    text_feature_dropdown_menu,
-    wordcloud_chart,
+
 )
 from dr_streamlit.datarobot_branding import datarobot_logo
 
