@@ -5,8 +5,7 @@ from dr_streamlit import (
     derived_features_chart,
     multiclass_dropdown_menu,
     project_model_dropdown,
-    text_feature_dropdown_menu,
-    wordcloud_chart,
+    text_feature_dropdown_menu, wordcloud_chart,
 )
 from datarobot import Client
 from datarobot.client import set_client
