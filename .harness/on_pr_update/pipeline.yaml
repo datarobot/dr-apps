@@ -1,0 +1,80 @@
+pipeline:
+  name: dr-apps
+  identifier: drapps_pr
+  projectIdentifier: drapps
+  orgIdentifier: No_Code_Apps
+  tags: {}
+  stages:
+    - parallel:
+        - stage:
+            name: Run Linters
+            identifier: run_linters
+            description: ""
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: Lint
+                      identifier: Run_Lint
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: python:3.9
+                        shell: Sh
+                        command: |-
+                          set -x
+                          make req-test
+                          make lint
+                        resources:
+                          limits:
+                            memory: 2Gi
+                            cpu: "1"
+        - stage:
+            name: Run Unit Test
+            identifier: run_unit_tests
+            description: ""
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: Run Unit Tests
+                      identifier: Tests
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: python:3.9
+                        shell: Sh
+                        command: |-
+                          set -x
+                          make req-test
+                          make test
+                        resources:
+                          limits:
+                            memory: 2Gi
+                            cpu: "1"
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.svc_harness_git1
+        repoName: dr-apps
+        build: <+input>
