@@ -8,8 +8,8 @@
 from typing import Optional
 
 import click
-from requests import Session
 from bson import ObjectId
+from requests import Session
 
 from drapps.helpers.custom_apps_functions import (
     get_custom_app_by_id,
