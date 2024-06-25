@@ -1,0 +1,14 @@
+inputSet:
+  name: dr-apps Input Set
+  identifier: drapps_input_set
+  orgIdentifier: No_Code_Apps
+  projectIdentifier: drapps
+  pipeline:
+    identifier: drapps_pr
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
