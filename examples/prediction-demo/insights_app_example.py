@@ -3,11 +3,12 @@ import os
 from datarobot import Client
 from datarobot.client import set_client
 from dr_streamlit import (
+text_feature_dropdown_menu,
+    wordcloud_chart,
     derived_features_chart,
     multiclass_dropdown_menu,
     project_model_dropdown,
-    text_feature_dropdown_menu,
-    wordcloud_chart,
+
 )
 
 if __name__ == '__main__':
