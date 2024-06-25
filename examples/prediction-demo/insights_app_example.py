@@ -1,7 +1,6 @@
 import os
 
-from datarobot import Client
-from datarobot.client import set_client
+
 from dr_streamlit import (
     derived_features_chart,
     multiclass_dropdown_menu,
@@ -9,6 +8,8 @@ from dr_streamlit import (
     text_feature_dropdown_menu,
     wordcloud_chart,
 )
+from datarobot import Client
+from datarobot.client import set_client
 
 if __name__ == '__main__':
     c = Client(
