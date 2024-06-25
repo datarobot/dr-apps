@@ -1,0 +1,26 @@
+trigger:
+  name: Trigger on PRs
+  identifier: drapps_trigger
+  enabled: true
+  orgIdentifier: No_Code_Apps
+  projectIdentifier: drapps
+  pipelineIdentifier: drapps_pr
+  source:
+    type: Webhook
+    spec:
+      type: Github
+      spec:
+        type: PullRequest
+        spec:
+          connectorRef: account.svc_harness_git1
+          autoAbortPreviousExecutions: true
+          payloadConditions: []
+          headerConditions: []
+          repoName: dr-apps
+          actions:
+            - Open
+            - Reopen
+            - Synchronize
+  pipelineBranchName:  <+trigger.branch>
+  inputSetRefs:
+    - drapps_input_set
