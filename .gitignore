@@ -5,3 +5,4 @@ dist/
 __pycache__
 # PyCharm/IntelliJ IDE config
 .idea/
+examples/custom-llm-chatbot/metadata.yaml

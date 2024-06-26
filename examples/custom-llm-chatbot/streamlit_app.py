@@ -6,7 +6,7 @@ from dr_streamlit import get_deployment, get_response
 
 DATAROBOT_API_TOKEN = os.getenv('DATAROBOT_API_TOKEN')
 DATAROBOT_ENDPOINT = os.getenv('DATAROBOT_ENDPOINT')
-LLM_DEPLOYMENT_ID = os.getenv('DEPLOYMENT_ID')
+LLM_DEPLOYMENT_ID = os.getenv('DEPLOYMENT_ID', '6675d042fc442fafbafa9a06')
 
 
 def setup():
