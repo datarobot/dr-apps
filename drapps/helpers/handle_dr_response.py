@@ -19,12 +19,15 @@ def handle_dr_response(response: Response, raise_error: bool = True) -> None:
         try:
             data = response.json()
             message = data.get('message', response.reason)
+            errors = data.get('errors', None)
         except JSONDecodeError:
             message = response.reason
+            errors = None
         exception = ClientResponseError(
             url=response.url,
             status=response.status_code,
             message=message,
+            errors=errors
         )
         if raise_error:
             raise exception

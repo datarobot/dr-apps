@@ -6,12 +6,19 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 
+from typing import Any, Dict, Optional
+
 
 class ClientResponseError(Exception):
-    def __init__(self, url: str, status: int, message: str):
+    def __init__(
+        self, url: str, status: int, message: str, errors: Optional[Dict[Any, Any]] = None
+    ):
         self.url = url
         self.status = status
         self.message = message
+        self.errors = errors
 
     def __str__(self) -> str:
+        if self.errors:
+            return f'{self.status}, message={self.message}, url={self.url}, errors={self.errors}'
         return f'{self.status}, message={self.message}, url={self.url}'
