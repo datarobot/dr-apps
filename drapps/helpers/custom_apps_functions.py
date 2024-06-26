@@ -114,7 +114,9 @@ def update_running_custom_app(
 
 
 def wait_for_publish_to_complete(session: Session, status_url: str):
-    click.echo("Waiting for publish to complete, the app will be ready when the old version is stopped")
+    click.echo(
+        "Waiting for publish to complete, the app will be ready when the old version is stopped"
+    )
     for _ in range(100):
         response = session.get(status_url)
         handle_dr_response(response)
@@ -123,4 +125,6 @@ def wait_for_publish_to_complete(session: Session, status_url: str):
             click.echo("New App is ready!")
             return
         else:
-            click.echo(f"The old version is {status['oldAppStatus']}, the new version is {status['appStatus']}")
+            click.echo(
+                f"The old version is {status['oldAppStatus']}, the new version is {status['appStatus']}"
+            )

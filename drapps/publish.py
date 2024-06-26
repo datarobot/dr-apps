@@ -91,4 +91,3 @@ def publish(
             session=session,
             status_url=location,
         )
-
