@@ -1,70 +1,41 @@
 import os
 
-import datarobot as dr
-import requests
 import streamlit as st
+from datarobot.client import Client, set_client
+from dr_streamlit import get_deployment, get_response
 
-API_URL = os.getenv('API_URL')
-API_KEY = os.getenv('API_KEY')
-DATAROBOT_KEY = os.getenv('DATAROBOT_KEY')
-LLM_DEPLOYMENT_ID = os.getenv('LLM_DEPLOYMENT_ID')
-DR_ENDPOINT = os.getenv('DR_ENDPOINT')
-
-
-class DataRobotPredictionError(Exception):
-    """Raised if there are issues getting predictions from DataRobot"""
-
-
-def _raise_dataroboterror_for_status(response):
-    """Raise DataRobotPredictionError if the request fails along with the response returned"""
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError:
-        err_msg = '{code} Error: {msg}'.format(code=response.status_code, msg=response.text)
-        raise DataRobotPredictionError(err_msg)
+DATAROBOT_API_TOKEN = os.getenv('DATAROBOT_API_TOKEN')
+DATAROBOT_ENDPOINT = os.getenv('DATAROBOT_ENDPOINT')
+LLM_DEPLOYMENT_ID = os.getenv('DEPLOYMENT_ID')
 
 
 def setup():
     try:
-        c = dr.Client(
-            token=API_KEY,
-            endpoint=DR_ENDPOINT,
+        c = Client(
+            token=DATAROBOT_API_TOKEN,
+            endpoint=DATAROBOT_ENDPOINT,
         )
-        dr.client.set_client(c)
+        set_client(c)
+        return True
     except ValueError as e:
         st.error("Unable to setup local environment")
-        if not API_KEY:
+        if not DATAROBOT_API_TOKEN:
             st.error(
-                "Please make sure the 'API_KEY' environment variable is set and is valid",
-                icon='🔐',
-            )
-        if not API_URL:
-            st.error(
-                "Please make sure the 'API_URL' environment variable is set and is valid",
-                icon='🔐',
-            )
-        if not DATAROBOT_KEY:
-            st.error(
-                "Please make sure the 'DATAROBOT_KEY' environment variable is set and is valid",
-                icon='🔐',
-            )
-        if not DR_ENDPOINT:
-            st.error(
-                "Please make sure the 'DR_ENDPOINT' environment variable is set and is valid",
+                "Please make sure the 'DATAROBOT_API_TOKEN' environment variable is set and is valid",
                 icon='🔐',
             )
         if not LLM_DEPLOYMENT_ID:
             st.error(
-                'The `LLM_DEPLOYMENT_ID` environment variable must be set to use the app',
+                'The `DEPLOYMENT_ID` environment variable must be set to use the app',
                 icon='🚨',
             )
         elif str(e) == 'The client is not compatible with the server version':
             st.error(
                 """
-            The API_KEY + endpoint pair provided is not valid.
+            The DATAROBOT_API_TOKEN + endpoint pair provided is not valid.
             If you use eu datarobot, you will need to set 'endpoint' environment variable to
             https://app.eu.datarobot.com/api/v2/
-            otherwise your API_KEY is not active.
+            otherwise your DATAROBOT_API_TOKEN is not active.
             """,
                 icon='🔐',
             )
@@ -74,15 +45,9 @@ def setup():
 
 
 def llm_chatbot():
+    st.set_page_config(page_title="Custom LLM Chatbot")
     st.write("# Welcome to Custom Deployed LLM Chatbot! 👋")
     st.markdown("<br><br>", unsafe_allow_html=True)
-
-    headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer {}'.format(API_KEY),
-        'DataRobot-Key': DATAROBOT_KEY,
-    }
-    url = API_URL.format(deployment_id=LLM_DEPLOYMENT_ID)
 
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
@@ -103,14 +68,10 @@ def llm_chatbot():
 
     if submit_button:
         if user_input:
-            predictions_response = requests.post(
-                url,
-                headers=headers,
-                data=data,
-            )
-            response = predictions_response.json()["data"][0]["prediction"]
+            deployment = get_deployment(LLM_DEPLOYMENT_ID)
+            llm_response = get_response(deployment, data)
 
-            st.session_state.chat_history.append((user_input, response))
+            st.session_state.chat_history.append((user_input, llm_response))
             st.session_state.current_input_key += 1
             st.experimental_rerun()
         else:
@@ -118,5 +79,5 @@ def llm_chatbot():
 
 
 if __name__ == "__main__":
-    setup()
-    llm_chatbot()
+    if setup():
+        llm_chatbot()
