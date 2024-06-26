@@ -86,7 +86,7 @@ def publish(
         endpoint=endpoint,
         payload=payload,
     )
-    if not skip_wait:
+    if (not skip_wait) and location:
         wait_for_publish_to_complete(
             session=session,
             status_url=location,

@@ -6,7 +6,6 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import posixpath
-import time
 from typing import Any, Dict, List, Optional
 
 import click
