@@ -29,6 +29,7 @@ tests_require = [
     'datarobot == 3.4.0',
     'plotly == 5.22',
     'streamlit_wordcloud == 0.1.0',
+    'kaleido==0.2.1'
 ]
 
 setup(
