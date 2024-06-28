@@ -281,7 +281,8 @@ def mock_feature_histogram_api(datarobot_url, projectid):
 @pytest.fixture
 def mock_prediction_server_api(datarobot_prediction_api_url, deploymentid, positive_class):
     responses.post(
-        f'{datarobot_prediction_api_url}/predApi/v1.0/deployments/{deploymentid}/predictions?maxExplanations=12&maxNgramExplanations=all'
+        f'{datarobot_prediction_api_url}/predApi/v1.0/deployments/{deploymentid}/predictions?maxExplanations=12&maxNgramExplanations=all',
+        json={'data': []}
     )
 
 
@@ -331,8 +332,8 @@ def test_select_predictor_demo():
     assert form.number_input[0].label == "numFeat"
     # Categorical Feature
     set_categorical_feat = "cat1"
-    form.selectbox[0].select(set_categorical_feat).run()
-    assert form.selectbox[0].label == "catFeat"
+    select_box = next((sb for sb in form.selectbox if sb.label == "catFeat"))
+    select_box.select(set_categorical_feat).run()
     # Text Feature
     set_text_feat = "This is a text feature"
     form.text_input[0].set_value(set_text_feat).run()

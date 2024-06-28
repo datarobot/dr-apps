@@ -17,7 +17,7 @@ install_requires = [
 
 tests_require = [
     'pytest==7.4.3',
-    'responses==0.23.3',
+    'responses==0.23.1',
     'black==23.12.0',
     'flake8==6.1.0',
     'isort==5.13.2',
