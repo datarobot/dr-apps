@@ -282,7 +282,7 @@ def mock_feature_histogram_api(datarobot_url, projectid):
 def mock_prediction_server_api(datarobot_prediction_api_url, deploymentid, positive_class):
     responses.post(
         f'{datarobot_prediction_api_url}/predApi/v1.0/deployments/{deploymentid}/predictions?maxExplanations=12&maxNgramExplanations=all',
-        json={'data': []}
+        json={}
     )
 
 

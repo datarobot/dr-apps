@@ -8,7 +8,7 @@ from datarobot import Deployment, FeatureHistogram, Project
 from .predictor import submit_batch_prediction, submit_prediction
 
 
-@st.cache
+@st.cache_data
 def get_prediction_features(project_id: str, deployment_id: str) -> List[Dict[str, Dict[str, Any]]]:
     deployment_features = Deployment(deployment_id).get_features()
     project_features = Project(project_id).get_features()

@@ -18,7 +18,6 @@ def is_deployment_serverless(deployment: Deployment) -> bool:
     return deployment.prediction_environment.get('platform') == 'datarobotServerless'
 
 
-@st.cache
 def submit_prediction(
     deployment: Deployment,
     prediction_data: pd.DataFrame,
