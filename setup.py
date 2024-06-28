@@ -25,6 +25,10 @@ tests_require = [
     'types-requests==2.31.0.10',
     'types-tabulate==0.9.0.20240106',
     'types-python-dateutil==2.8.19.20240106',
+    'streamlit == 1.35.0',
+    'datarobot == 3.4.0',
+    'plotly == 5.22',
+    'streamlit_wordcloud == 0.1.0',
 ]
 
 setup(
