@@ -10,7 +10,8 @@ req-test:
 	pip install -e .[test]
 
 test:
-	py.test -sv tests/
+	py.test -sv tests/ --log-cli-level=DEBUG
+	py.test -sv examples/prediction-demo/tests/ --log-cli-level=DEBUG
 
 black:
 	black ./bin ./drapps ./tests -S -l 100
