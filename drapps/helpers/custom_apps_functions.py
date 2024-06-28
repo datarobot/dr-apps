@@ -8,6 +8,7 @@
 import posixpath
 from typing import Any, Dict, List, Optional
 
+import click
 from requests import Session
 
 from .exceptions import ClientResponseError
@@ -65,7 +66,7 @@ def get_custom_app_by_name(session: Session, endpoint: str, app_name: str) -> Di
             message=f'Can\'t find custom application "{app_name}" by name.',
             url=error_url,
         )
-    return apps[0]
+    return next((app for app in apps if app['name'] == app_name))
 
 
 def get_custom_app_logs(session: Session, endpoint: str, app_id: str) -> Dict[str, Any]:
@@ -102,8 +103,27 @@ def check_starting_status(session: Session, status_url: str) -> str:
 
 def update_running_custom_app(
     session: Session, app_id: str, endpoint: str, payload: Dict[str, Any]
-) -> None:
+) -> Optional[str]:
     """Updates a running custom app's name / active app/ etc"""
+    click.echo("Editing app w/ ID: {}".format(app_id))
     url = posixpath.join(endpoint, f'customApplications/{app_id}/')
     response = session.patch(url, json=payload)
     handle_dr_response(response)
+    return response.headers.get('location')
+
+
+def wait_for_publish_to_complete(session: Session, status_url: str):
+    click.echo(
+        "Waiting for publish to complete, the app will be ready when the old version is stopped"
+    )
+    for _ in range(100):
+        response = session.get(status_url)
+        handle_dr_response(response)
+        status = response.json()
+        if status['oldAppStatus'] == 'stopped':
+            click.echo("New App is ready!")
+            return
+        else:
+            click.echo(
+                f"The old version is {status['oldAppStatus']}, the new version is {status['appStatus']}"
+            )

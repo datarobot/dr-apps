@@ -15,6 +15,7 @@ from drapps.helpers.custom_apps_functions import (
     get_custom_app_by_id,
     get_custom_app_by_name,
     update_running_custom_app,
+    wait_for_publish_to_complete,
 )
 from drapps.helpers.wrappers import api_endpoint, api_token
 
@@ -43,12 +44,20 @@ from drapps.helpers.wrappers import api_endpoint, api_token
     type=click.STRING,
     help='Name or ID for the application to copy the application from.',
 )
+@click.option(
+    '--skip-wait',
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help='Do not wait for ready status.',
+)
 def publish(
     application_to_be_updated: str,
     token: str,
     endpoint: str,
     name: Optional[str],
     source_application: Optional[str],
+    skip_wait: bool,
 ) -> None:
     """Updates a custom app, this covers the basic case of a new name
     and also the custom apps publishing work which is scoped for 10.2
@@ -71,9 +80,14 @@ def publish(
 
     if name:
         payload['name'] = name
-    update_running_custom_app(
+    location = update_running_custom_app(
         session=session,
         app_id=app_id,
         endpoint=endpoint,
         payload=payload,
     )
+    if (not skip_wait) and location:
+        wait_for_publish_to_complete(
+            session=session,
+            status_url=location,
+        )

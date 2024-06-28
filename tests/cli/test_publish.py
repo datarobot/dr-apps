@@ -84,7 +84,7 @@ def test_publish_app(
     )
 
     runner = CliRunner()
-    result = runner.invoke(publish, cli_args)
+    result = runner.invoke(publish, [*cli_args, '--skip-wait'])
     logger = logging.getLogger()
     if result.exit_code:
         logger.error(result.output)
