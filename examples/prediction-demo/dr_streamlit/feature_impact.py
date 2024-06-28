@@ -13,7 +13,7 @@ from .select_box import AGGREGATED_NAME
 from .wrappers import chart_with_error_backup
 
 
-@st.cache
+@st.cache_data
 def _get_aggregated_feature_impact_data(project_id: str, model_id: str):
     fi_data = initialize_and_get_feature_impact(
         project_id=project_id, model_id=model_id, use_multiclass=False
@@ -21,7 +21,7 @@ def _get_aggregated_feature_impact_data(project_id: str, model_id: str):
     return pd.DataFrame.from_records(fi_data).sort_values('impactNormalized', ignore_index=True)
 
 
-@st.cache
+@st.cache_data
 def _get_multiclass_feature_impact_data(project_id: str, model_id: str):
     aggregated_fi = _get_aggregated_feature_impact_data(
         project_id=project_id,
