@@ -328,16 +328,17 @@ def test_select_predictor_demo():
     form.selectbox[0].select("Predictor Demo").run()
     # The single Numerical Feature
     set_num_feat = 12
-    form.number_input[0].set_value(set_num_feat).run()
-    assert form.number_input[0].label == "numFeat"
+    form_input = next(( i for i in form.number_input if i.label == "numFeat" ))
+    form_input.set_value(set_num_feat).run()
+
     # Categorical Feature
     set_categorical_feat = "cat1"
     select_box = next((sb for sb in form.selectbox if sb.label == "catFeat"))
     select_box.select(set_categorical_feat).run()
     # Text Feature
     set_text_feat = "This is a text feature"
-    form.text_input[0].set_value(set_text_feat).run()
-    assert form.text_input[0].label == "strFeat"
+    form_input = next((i for i in form.text_input if i.label == "strFeat"))
+    form_input.set_value(set_text_feat).run()
     # Ship that prediction off to DataRobot!
     form.main.button[0].click().run()
 
