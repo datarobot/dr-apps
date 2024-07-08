@@ -18,7 +18,6 @@ def is_deployment_serverless(deployment: Deployment) -> bool:
     return deployment.prediction_environment.get('platform') == 'datarobotServerless'
 
 
-@st.cache
 def submit_prediction(
     deployment: Deployment,
     prediction_data: pd.DataFrame,
@@ -86,7 +85,7 @@ def _camelCase_keys_to_snake_case_keys(data: Union[Dict[str, Any], List]):
     }
 
 
-@st.cache
+@st.cache_data
 def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explanations: int):
     [_, result] = BatchPredictionJob.score_pandas(
         deployment=deployment,
@@ -133,7 +132,7 @@ def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explan
     return {'data': scored_predictions}
 
 
-@st.cache
+@st.cache_data
 def get_distribution_chart_data(
     project_id: str, model_id: str, specified_class: Optional[str] = None
 ):

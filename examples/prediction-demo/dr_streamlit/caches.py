@@ -5,27 +5,26 @@ from datarobot import Deployment, FeatureImpactJob, Model, Project
 from datarobot.errors import ClientError
 
 
-@st.cache
 def get_project(project_id: str) -> Project:
     return Project.get(project_id)
 
 
-@st.cache
+@st.cache_data
 def get_model(project_id: str, model_id: str) -> Model:
     return Model.get(project_id, model_id)
 
 
-@st.cache
+@st.cache_data
 def get_deployment(deployment_id: str) -> Deployment:
     return Deployment.get(deployment_id)
 
 
-@st.cache
+@st.cache_data
 def get_model_features(project_id: str, model_id: str) -> List[str]:
     return Model(project_id=project_id, id=model_id).get_features_used()
 
 
-@st.cache
+@st.cache_data
 def initialize_and_get_feature_impact(
     project_id: str, model_id: str, use_multiclass: bool
 ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:

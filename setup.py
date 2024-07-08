@@ -10,21 +10,27 @@ install_requires = [
     'bson==0.5.10',
     'click==8.1.7',
     'dateutils==0.6.12',
-    'requests==2.31.0',
+    'requests>=2.28,<2.29',
     'requests-toolbelt==1.0.0',
     'tabulate==0.9.0',
 ]
 
 tests_require = [
     'pytest==7.4.3',
-    'responses==0.23.3',
+    'responses==0.23.1',
     'black==23.12.0',
     'flake8==6.1.0',
     'isort==5.13.2',
     'mypy==1.7.1',
-    'types-requests==2.31.0.10',
+    'types-requests==2.28.11',
     'types-tabulate==0.9.0.20240106',
     'types-python-dateutil==2.8.19.20240106',
+    'streamlit == 1.35.0',
+    'datarobot == 3.4.0',
+    'plotly == 5.22',
+    'streamlit_wordcloud == 0.1.0',
+    'kaleido==0.2.1',
+    'pillow==10.3.0'
 ]
 
 setup(

@@ -6,7 +6,7 @@ import streamlit as st
 from datarobot import FeatureHistogram
 
 
-@st.cache
+@st.cache_data
 def get_feature_histogram_data(project_id: str, feature_name: str, bin_limit: Optional[int] = 10):
     fh = FeatureHistogram.get(project_id=project_id, feature_name=feature_name, bin_limit=bin_limit)
     return pd.DataFrame.from_records(fh.plot)

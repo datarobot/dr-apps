@@ -8,7 +8,7 @@ from .caches import get_project, initialize_and_get_feature_impact
 AGGREGATED_NAME = "Aggregated"
 
 
-@st.cache
+@st.cache_data
 def _get_multiclass_names(project_id: str, model_id: str) -> List[str]:
     """
     Gets all multiclass names for a given model.
@@ -31,7 +31,7 @@ def multiclass_dropdown_menu(project_id: str, model_id: str) -> Optional[str]:
     return st.sidebar.selectbox("Select a class:", all_classes)
 
 
-@st.cache
+@st.cache_data
 def _get_text_feature_names(project_id: str) -> List[str]:
     features = Project(project_id).get_features()
     text_features = [feature.name for feature in features if feature.feature_type == 'Text']
@@ -44,7 +44,7 @@ def text_feature_dropdown_menu(project_id: str) -> str:
     return st.sidebar.selectbox("Select a text feature:", all_text_features)
 
 
-@st.cache
+@st.cache_data
 def _get_models(project_id: str) -> List[str]:
     return [model.id for model in Project(project_id).get_models()]
 
