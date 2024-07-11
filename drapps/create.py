@@ -106,7 +106,7 @@ def create_new_custom_app_source_version(
         version_count = 0
 
     click.echo(f'Using {source_name} custom application source.')
-    version_label = f'script_generated_{version_count}'
+    version_label = f'v{version_count +1 }'
     new_version = create_application_source_version(
         session, endpoint, app_source['id'], version_label
     )
