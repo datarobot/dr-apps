@@ -176,7 +176,7 @@ def test_create_from_project(
     )
     # request for creating new application source version
     custom_app_source_version_id = str(ObjectId())
-    source_version_data_matcher = matchers.json_params_matcher({'label': 'script_generated_0'})
+    source_version_data_matcher = matchers.json_params_matcher({'label': 'v0'})
     responses.post(
         f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/',
         json={'id': custom_app_source_version_id},
