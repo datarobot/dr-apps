@@ -16,6 +16,7 @@ from drapps.helpers.custom_apps_functions import (
     get_custom_app_by_name,
     update_running_custom_app,
     wait_for_publish_to_complete,
+    get_history_by_index,
 )
 from drapps.helpers.wrappers import api_endpoint, api_token
 
@@ -85,6 +86,64 @@ def publish(
         app_id=app_id,
         endpoint=endpoint,
         payload=payload,
+    )
+    if (not skip_wait) and location:
+        wait_for_publish_to_complete(
+            session=session,
+            status_url=location,
+        )
+
+
+@click.command()
+@api_token
+@api_endpoint
+@click.option(
+    '-i',
+    '--application-to-be-updated',
+    required=True,
+    type=click.STRING,
+    help='Name or ID for the application to update.',
+)
+@click.option(
+    '-b',
+    '--by',
+    required=True,
+    type=click.INT,
+    help='How many versions back you are going',
+)
+@click.option(
+    '--skip-wait',
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help='Do not wait for ready status.',
+)
+def revert_publish(
+    token: str,
+    endpoint: str,
+    by: int,
+    application_to_be_updated: str,
+    skip_wait: bool,
+):
+    session = Session()
+    session.headers.update({'Authorization': f'Bearer {token}'})
+    if ObjectId.is_valid(application_to_be_updated):
+        app_id = application_to_be_updated
+    else:
+        app = get_custom_app_by_name(session, endpoint, app_name=application_to_be_updated)
+        app_id = app['id']
+    history = get_history_by_index(
+        session=session,
+        app_id=app_id,
+        endpoint=endpoint,
+        index=by,
+    )
+
+    location = update_running_custom_app(
+        session=session,
+        app_id=app_id,
+        endpoint=endpoint,
+        payload={'customApplicationSourceVersionId': history['sourceVersionId']},
     )
     if (not skip_wait) and location:
         wait_for_publish_to_complete(

@@ -12,7 +12,7 @@ from drapps.create import create
 from drapps.env import create_env
 from drapps.logs import logs
 from drapps.ls import ls
-from drapps.publish import publish
+from drapps.publish import publish, revert_publish
 from drapps.terminate import terminate
 
 help_text = (
@@ -20,7 +20,7 @@ help_text = (
     'You can use drapps COMMAND --help for getting more info about command.'
 )
 drapps = Group(
-    commands=[create, ls, logs, terminate, create_env, publish],
+    commands=[create, ls, logs, terminate, create_env, publish, revert_publish],
     help=help_text,
 )
 
