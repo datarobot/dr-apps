@@ -120,7 +120,7 @@ def wait_for_publish_to_complete(session: Session, status_url: str):
         response = session.get(status_url)
         handle_dr_response(response)
         status = response.json()
-        if status['oldAppStatus'] == 'stopped':
+        if status['oldAppStatus'] == 'stopped' and status['appStatus'] == 'running':
             click.echo("New App is ready!")
             return
         else:
