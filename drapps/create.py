@@ -255,6 +255,17 @@ def wait_for_custom_app_spinning(session: Session, status_check_url: str) -> str
             sleep(CHECK_STATUS_WAIT_TIME)
 
 
+def parse_env_vars(ctx, param, value):
+    res = {}
+    try:
+        for x in value:
+            key, val = x.split('=')
+            res[key] = val
+        return res
+    except ValueError:
+        raise click.BadParameter('Environment variables must be in the format KEY=VALUE')
+
+
 @click.command()
 @api_token
 @api_endpoint
@@ -286,6 +297,22 @@ def wait_for_custom_app_spinning(session: Session, status_check_url: str) -> str
     default=False,
     help='Do not wait for ready status.',
 )
+@click.option(
+    '--stringEnvVar',
+    multiple=True,
+    required=False,
+    type=click.STRING,
+    callback=parse_env_vars,
+    help='String environment variable in the format KEY=VALUE',
+)
+@click.option(
+    '--intEnvVar',
+    multiple=True,
+    required=False,
+    type=click.STRING,
+    callback=parse_env_vars,
+    help='Integer environment variable in the format KEY=VALUE',
+)
 @click.argument('application_name', type=click.STRING, required=True)
 def create(
     token: str,
@@ -294,6 +321,8 @@ def create(
     path: Optional[Path],
     image: Optional[Path],
     skip_wait: bool,
+    stringenvvar: Optional[Dict[str, str]],
+    intenvvar: Optional[Dict[str, str]],
     application_name: str,
 ) -> None:
     """
