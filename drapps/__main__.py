@@ -10,11 +10,11 @@ from click import Group
 
 from drapps.create import create
 from drapps.env import create_env
+from drapps.env_vars import env_vars
 from drapps.logs import logs
 from drapps.ls import ls
 from drapps.publish import publish
 from drapps.terminate import terminate
-from drapps.env_vars import env_vars
 
 help_text = (
     'CLI tools for custom applications.\n\n'
