@@ -1,18 +1,7 @@
-from typing import Optional, Dict
+from typing import Dict
 
 import click
 
-
-def parse_key_value(ctx, param, value):
-    res = {}
-    try:
-        for x in value:
-            key, val = x.split('=')
-            res[key] = val
-        click.echo(f"\n\n\nRes: {res}\n\n\n")
-        return res
-    except ValueError:
-        raise click.BadParameter('Environment variables must be in the format KEY=VALUE')
 
 def parse_key_value(ctx, param, value):
     res = {}
