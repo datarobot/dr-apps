@@ -13,6 +13,7 @@ def parse_key_value(ctx, param, value):
     except ValueError:
         raise click.BadParameter('Environment variables must be in the format KEY=VALUE')
 
+
 @click.command()
 @click.option(
     '--stringEnvVar',
