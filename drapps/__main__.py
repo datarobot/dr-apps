@@ -14,13 +14,14 @@ from drapps.logs import logs
 from drapps.ls import ls
 from drapps.publish import publish
 from drapps.terminate import terminate
+from drapps.env_vars import env_vars
 
 help_text = (
     'CLI tools for custom applications.\n\n'
     'You can use drapps COMMAND --help for getting more info about command.'
 )
 drapps = Group(
-    commands=[create, ls, logs, terminate, create_env, publish],
+    commands=[create, ls, logs, terminate, create_env, publish, env_vars],
     help=help_text,
 )
 
