@@ -91,8 +91,42 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
     return env['latestVersion']['id']
 
 
+def get_runtime_params(
+    string_env_var: Dict[str, str], integer_env_var: Dict[str, str]
+) -> List[Dict]:
+    runtime_params = []
+    for key, value in string_env_var.items():
+        runtime_params.append(
+            {
+                'type': 'string',
+                'fieldName': key,
+                'defaultValue': value,
+                'allowEmpty': True,
+                'description': None,
+                'overrideValue': value,
+                'currentValue': value,
+            }
+        )
+    for key, value in integer_env_var.items():
+        runtime_params.append(
+            {
+                'type': 'integer',
+                'fieldName': key,
+                'defaultValue': value,
+                'allowEmpty': True,
+                'description': None,
+                'overrideValue': value,
+                'currentValue': value,
+            }
+        )
+    return runtime_params
+
+
 def create_new_custom_app_source_version(
-    session: Session, endpoint: str, source_name: str
+    session: Session,
+    endpoint: str,
+    source_name: str,
+    runtime_params: List[Dict],
 ) -> Tuple[str, str]:
     try:
         app_source = get_custom_app_source_by_name(session, endpoint, source_name)
@@ -108,7 +142,7 @@ def create_new_custom_app_source_version(
     click.echo(f'Using {source_name} custom application source.')
     version_label = f'v{version_count +1 }'
     new_version = create_application_source_version(
-        session, endpoint, app_source['id'], version_label
+        session, endpoint, app_source['id'], version_label, runtime_params
     )
     click.echo(f'Creating new version for {source_name} custom application source.')
     return app_source['id'], new_version['id']
@@ -154,12 +188,17 @@ def configure_custom_app_source_version(
 
 
 def create_app_from_project(
-    session: Session, endpoint: str, base_env: str, project_folder: Path, app_name: str
+    session: Session,
+    endpoint: str,
+    base_env: str,
+    project_folder: Path,
+    app_name: str,
+    runtime_params: List[Dict],
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
     custom_app_source_id, custom_app_source_version_id = create_new_custom_app_source_version(
-        session, endpoint, source_name
+        session, endpoint, source_name, runtime_params
     )
     configure_custom_app_source_version(
         session=session,
@@ -338,6 +377,8 @@ def create(
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 
+    runtime_params = get_runtime_params(stringenvvar, intenvvar)
+
     if is_app_name_in_use(session, endpoint, application_name):
         message = f'Name {application_name} is used by other custom application'
         raise click.BadParameter(message, param_hint='APPLICATION_NAME')
@@ -353,6 +394,7 @@ def create(
             base_env=base_env,  # type: ignore[arg-type]
             project_folder=path,  # type: ignore[arg-type]
             app_name=application_name,
+            runtime_params=runtime_params,
         )
 
     if skip_wait or not app_data.get('statusUrl'):
