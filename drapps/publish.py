@@ -14,9 +14,9 @@ from requests import Session
 from drapps.helpers.custom_apps_functions import (
     get_custom_app_by_id,
     get_custom_app_by_name,
+    get_history_by_index,
     update_running_custom_app,
     wait_for_publish_to_complete,
-    get_history_by_index,
 )
 from drapps.helpers.wrappers import api_endpoint, api_token
 
