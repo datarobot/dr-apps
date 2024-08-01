@@ -136,7 +136,7 @@ def revert_publish(
         session=session,
         app_id=app_id,
         endpoint=endpoint,
-        index=by,
+        index=by - 1,
     )
 
     location = update_running_custom_app(

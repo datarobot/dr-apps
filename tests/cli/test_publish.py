@@ -121,13 +121,13 @@ def test_revert_publish_by_index(api_token_env, api_endpoint_env, use_name_for_s
 
     cli_args = ['-i', app_name if use_name_for_src_app else app_id]
     # Since we know the index, we can query with pagination to read the history.
-    history_params_matcher = matchers.query_param_matcher({'limit': 1, 'offset': index})
+    history_params_matcher = matchers.query_param_matcher({'limit': 1, 'offset': index - 1})
     # There are more attrs on the object, but they aren't used here
     history_entity = {'sourceVersionId': str(ObjectId())}
     responses.get(
         f'{api_endpoint_env}/customApplications/{app_id}/history/',
         json={'count': 1, 'data': [history_entity]},
-        match=[auth_matcher],
+        match=[auth_matcher, history_params_matcher],
     )
 
     # We then want to verify that the publish API is called with the proper
