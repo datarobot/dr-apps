@@ -15,7 +15,7 @@ from bson import ObjectId
 from click.testing import CliRunner
 from responses import matchers
 
-from drapps.publish import publish
+from drapps.publish import publish, revert_publish
 
 
 @responses.activate
@@ -91,3 +91,60 @@ def test_publish_app(
     else:
         logger.info(result.output)
     assert result.exit_code == 0, result.exception
+
+
+@responses.activate
+@pytest.mark.parametrize('use_name_for_src_app', [False, True])
+def test_revert_publish_by_index(api_token_env, api_endpoint_env, use_name_for_src_app):
+    """
+    Most likely case is a user wants to revert to the last published app.
+    This is supposed to sorta rhyme with git's
+    "git reset --hard HEAD~1"
+    but instead be:
+    "drapps revert-publish -i MyApp --by=1"
+    which should be familiar to a lot of developers.
+    Potentially in the future, we could have a `soft` revert which makes a new app?
+    """
+    auth_matcher = matchers.header_matcher({'Authorization': f'Bearer {api_token_env}'})
+    app_name = "Custom Publishing App"
+    app_id = ObjectId('669fdb684d44ac1c99dda99c')
+    index = 3
+    if use_name_for_src_app:
+        app_list_url = f'{api_endpoint_env}/customApplications/'
+        # check that name filter was used
+        params_matcher = matchers.query_param_matcher({'name': app_name})
+        responses.get(
+            app_list_url,
+            json={'count': 1, 'data': [{'id': str(app_id), 'name': app_name}]},
+            match=[auth_matcher, params_matcher],
+        )
+
+    cli_args = ['-i', app_name if use_name_for_src_app else app_id]
+    # Since we know the index, we can query with pagination to read the history.
+    history_params_matcher = matchers.query_param_matcher({'limit': 1, 'offset': index - 1})
+    # There are more attrs on the object, but they aren't used here
+    history_entity = {'sourceVersionId': str(ObjectId())}
+    responses.get(
+        f'{api_endpoint_env}/customApplications/{app_id}/history/',
+        json={'count': 1, 'data': [history_entity]},
+        match=[auth_matcher, history_params_matcher],
+    )
+
+    # We then want to verify that the publish API is called with the proper
+    responses.patch(
+        f'{api_endpoint_env}/customApplications/{app_id}/',
+        json={'customApplicationSourceVersionId': history_entity['sourceVersionId']},
+        match=[auth_matcher],
+        status=204,
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(revert_publish, [*cli_args, '--by', index, '--skip-wait'])
+
+    logger = logging.getLogger()
+    if result.exit_code:
+        logger.error(result.output)
+    else:
+        logger.info(result.output)
+
+    assert result.exit_code == 0, result.output

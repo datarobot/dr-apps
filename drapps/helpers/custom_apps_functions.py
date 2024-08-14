@@ -120,10 +120,20 @@ def wait_for_publish_to_complete(session: Session, status_url: str):
         response = session.get(status_url)
         handle_dr_response(response)
         status = response.json()
-        if status['oldAppStatus'] == 'stopped':
+        if status['oldAppStatus'] == 'stopped' and status['appStatus'] == 'running':
             click.echo("New App is ready!")
             return
         else:
             click.echo(
                 f"The old version is {status['oldAppStatus']}, the new version is {status['appStatus']}"
             )
+
+
+def get_history_by_index(
+    session: Session, app_id: str, endpoint: str, index: int
+) -> Dict[str, Optional[str]]:
+    history_url = posixpath.join(endpoint, f'customApplications/{app_id}/history/')
+    rsp = session.get(history_url, params={'limit': 1, 'offset': index})
+    handle_dr_response(rsp)
+    history = rsp.json()
+    return history['data'][0]
