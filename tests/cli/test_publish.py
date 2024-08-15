@@ -138,8 +138,14 @@ def test_revert_publish_by_index(api_token_env, api_endpoint_env, use_name_for_s
         status=204,
     )
 
+    responses.get(
+        f'{api_endpoint_env}/customApplications/{app_id}/',
+        json={'status': 'running'},
+        match=[auth_matcher],
+    )
+
     runner = CliRunner()
-    result = runner.invoke(revert_publish, [*cli_args, '--by', index, '--skip-wait'])
+    result = runner.invoke(revert_publish, [*cli_args, '--by', index])
 
     logger = logging.getLogger()
     if result.exit_code:

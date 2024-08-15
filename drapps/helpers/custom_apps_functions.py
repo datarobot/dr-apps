@@ -6,6 +6,7 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import posixpath
+import time
 from typing import Any, Dict, List, Optional
 
 import click
@@ -103,30 +104,25 @@ def check_starting_status(session: Session, status_url: str) -> str:
 
 def update_running_custom_app(
     session: Session, app_id: str, endpoint: str, payload: Dict[str, Any]
-) -> Optional[str]:
+):
     """Updates a running custom app's name / active app/ etc"""
     click.echo("Editing app w/ ID: {}".format(app_id))
     url = posixpath.join(endpoint, f'customApplications/{app_id}/')
     response = session.patch(url, json=payload)
     handle_dr_response(response)
-    return response.headers.get('location')
 
 
-def wait_for_publish_to_complete(session: Session, status_url: str):
-    click.echo(
-        "Waiting for publish to complete, the app will be ready when the old version is stopped"
-    )
+def wait_for_app_to_be_running(session: Session, endpoint: str, app_id: str):
+    click.echo("Waiting for publish to complete.")
     for _ in range(100):
-        response = session.get(status_url)
-        handle_dr_response(response)
-        status = response.json()
-        if status['oldAppStatus'] == 'stopped' and status['appStatus'] == 'running':
+        app = get_custom_app_by_id(session=session, endpoint=endpoint, app_id=app_id)
+        if app['status'] == 'running':
             click.echo("New App is ready!")
             return
-        else:
-            click.echo(
-                f"The old version is {status['oldAppStatus']}, the new version is {status['appStatus']}"
-            )
+        elif app['status'] == 'failed':
+            click.echo("App failed to start.")
+            return
+        time.sleep(5)
 
 
 def get_history_by_index(
