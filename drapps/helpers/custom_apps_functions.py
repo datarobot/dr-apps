@@ -5,6 +5,7 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
+import time
 import posixpath
 from typing import Any, Dict, List, Optional
 
@@ -103,7 +104,7 @@ def check_starting_status(session: Session, status_url: str) -> str:
 
 def update_running_custom_app(
     session: Session, app_id: str, endpoint: str, payload: Dict[str, Any]
-) -> Optional[str]:
+):
     """Updates a running custom app's name / active app/ etc"""
     click.echo("Editing app w/ ID: {}".format(app_id))
     url = posixpath.join(endpoint, f'customApplications/{app_id}/')
