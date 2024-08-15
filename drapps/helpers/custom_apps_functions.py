@@ -5,8 +5,8 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
-import time
 import posixpath
+import time
 from typing import Any, Dict, List, Optional
 
 import click
