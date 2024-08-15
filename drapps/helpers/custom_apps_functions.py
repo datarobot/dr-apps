@@ -119,6 +119,9 @@ def wait_for_app_to_be_running(session: Session, endpoint: str, app_id: str):
         if app['status'] == 'running':
             click.echo("New App is ready!")
             return
+        elif app['status'] == 'failed':
+            click.echo("App failed to start.")
+            return
         time.sleep(5)
 
 
