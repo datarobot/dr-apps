@@ -55,11 +55,11 @@ def get_custom_app_source_by_name(
 
 
 def create_application_source_version(
-    session: Session, endpoint: str, source_id: str, version_label: str, runtime_params: List[Dict]
+    session: Session, endpoint: str, source_id: str, version_label: str
 ) -> Dict[str, Any]:
     """Create new application source version."""
     url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/")
-    response = session.post(url, json={"label": version_label, "runtimeParameters": runtime_params})
+    response = session.post(url, json={"label": version_label})
     handle_dr_response(response)
     return response.json()
 
