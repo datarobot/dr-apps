@@ -16,7 +16,7 @@ from drapps.helpers.custom_apps_functions import (
     get_custom_app_by_name,
     get_history_by_index,
     update_running_custom_app,
-    wait_for_publish_to_complete,
+    wait_for_app_to_be_running,
 )
 from drapps.helpers.wrappers import api_endpoint, api_token
 
@@ -81,16 +81,17 @@ def publish(
 
     if name:
         payload['name'] = name
-    location = update_running_custom_app(
+    update_running_custom_app(
         session=session,
         app_id=app_id,
         endpoint=endpoint,
         payload=payload,
     )
-    if (not skip_wait) and location:
-        wait_for_publish_to_complete(
+    if not skip_wait:
+        wait_for_app_to_be_running(
             session=session,
-            status_url=location,
+            app_id=app_id,
+            endpoint=endpoint,
         )
 
 
@@ -139,14 +140,15 @@ def revert_publish(
         index=by - 1,
     )
 
-    location = update_running_custom_app(
+    update_running_custom_app(
         session=session,
         app_id=app_id,
         endpoint=endpoint,
         payload={'customApplicationSourceVersionId': history['sourceVersionId']},
     )
-    if (not skip_wait) and location:
-        wait_for_publish_to_complete(
+    if not skip_wait:
+        wait_for_app_to_be_running(
             session=session,
-            status_url=location,
+            endpoint=endpoint,
+            app_id=app_id,
         )
