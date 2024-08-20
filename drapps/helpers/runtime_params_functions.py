@@ -1,4 +1,3 @@
-from importlib.metadata import metadata
 from pathlib import Path
 from typing import Any, Dict, Tuple
 

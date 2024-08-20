@@ -42,8 +42,8 @@ from .helpers.execution_environments_functions import (
     get_execution_environment_by_name,
     get_execution_environment_version_by_id,
 )
-from .helpers.wrappers import api_endpoint, api_token
 from .helpers.runtime_params_functions import verify_runtime_env_vars
+from .helpers.wrappers import api_endpoint, api_token
 
 UPLOAD_CHUNK_SIZE = 50
 CHECK_STATUS_WAIT_TIME = 5
@@ -93,25 +93,27 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
 
 
 def get_runtime_params(
-    string_env_var: Dict[str, str], integer_env_var: Dict[str, str]
+    string_env_var: Optional[Dict[str, str]], integer_env_var: Optional[Dict[str, str]]
 ) -> List[Dict]:
     runtime_params = []
-    for key, value in string_env_var.items():
-        runtime_params.append(
-            {
-                'fieldName': key,
-                'value': value,
-                'type': 'string',
-            }
-        )
-    for key, value in integer_env_var.items():
-        runtime_params.append(
-            {
-                'fieldName': key,
-                'value': value,
-                'type': 'integer',
-            }
-        )
+    if string_env_var:
+        for key, value in string_env_var.items():
+            runtime_params.append(
+                {
+                    'fieldName': key,
+                    'value': value,
+                    'type': 'string',
+                }
+            )
+    if integer_env_var:
+        for key, value in integer_env_var.items():
+            runtime_params.append(
+                {
+                    'fieldName': key,
+                    'value': value,
+                    'type': 'integer',
+                }
+            )
     return runtime_params
 
 
@@ -144,10 +146,6 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
     """Generator that splits a list into chunks of specified size."""
     iterator = iter(iterable)
     return iter(lambda: tuple(islice(iterator, chunk_size)), ())
-
-
-from typing import List, Tuple
-from pathlib import Path
 
 
 def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Tuple[Path, str]]:
