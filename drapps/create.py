@@ -43,6 +43,7 @@ from .helpers.execution_environments_functions import (
     get_execution_environment_version_by_id,
 )
 from .helpers.wrappers import api_endpoint, api_token
+from .helpers.runtime_params_functions import verify_runtime_env_vars
 
 UPLOAD_CHUNK_SIZE = 50
 CHECK_STATUS_WAIT_TIME = 5
@@ -98,25 +99,17 @@ def get_runtime_params(
     for key, value in string_env_var.items():
         runtime_params.append(
             {
-                'type': 'string',
                 'fieldName': key,
-                'defaultValue': value,
-                'allowEmpty': True,
-                'description': None,
-                'overrideValue': value,
-                'currentValue': value,
+                'value': value,
+                'type': 'string',
             }
         )
     for key, value in integer_env_var.items():
         runtime_params.append(
             {
-                'type': 'integer',
                 'fieldName': key,
-                'defaultValue': value,
-                'allowEmpty': True,
-                'description': None,
-                'overrideValue': value,
-                'currentValue': value,
+                'value': value,
+                'type': 'integer',
             }
         )
     return runtime_params
@@ -126,7 +119,6 @@ def create_new_custom_app_source_version(
     session: Session,
     endpoint: str,
     source_name: str,
-    runtime_params: List[Dict],
 ) -> Tuple[str, str]:
     try:
         app_source = get_custom_app_source_by_name(session, endpoint, source_name)
@@ -142,7 +134,7 @@ def create_new_custom_app_source_version(
     click.echo(f'Using {source_name} custom application source.')
     version_label = f'v{version_count +1 }'
     new_version = create_application_source_version(
-        session, endpoint, app_source['id'], version_label, runtime_params
+        session, endpoint, app_source['id'], version_label
     )
     click.echo(f'Creating new version for {source_name} custom application source.')
     return app_source['id'], new_version['id']
@@ -154,6 +146,26 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
     return iter(lambda: tuple(islice(iterator, chunk_size)), ())
 
 
+from typing import List, Tuple
+from pathlib import Path
+
+
+def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Tuple[Path, str]]:
+    """
+    Extract the metadata.yaml file from the list of project files.
+
+    Args:
+    project_files (List[Tuple[Path, str]]): List of tuples containing absolute and relative paths of project files.
+
+    Returns:
+    Tuple[Path, str] | None: A tuple containing the absolute and relative paths of metadata.yaml if found, None otherwise.
+    """
+    for file_path, relative_path in project_files:
+        if relative_path.lower() == 'metadata.yaml':
+            return (file_path, relative_path)
+    return None
+
+
 def configure_custom_app_source_version(
     session: Session,
     endpoint: str,
@@ -161,10 +173,14 @@ def configure_custom_app_source_version(
     custom_app_source_version_id: str,
     project: Path,
     base_env_version_id: str,
+    runtime_params: List[Dict],
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
-
+    # verify_metadata_and_runtime_params
+    metadata_file = extract_metadata_yaml(project_files)
+    if metadata_file:
+        verify_runtime_env_vars(metadata_file, runtime_params)
     progress: ProgressBar  # type hinting badly needed by mypy
     with click.progressbar(length=len(project_files), label='Uploading project:') as progress:
         # grouping project files in chunks
@@ -198,7 +214,7 @@ def create_app_from_project(
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
     custom_app_source_id, custom_app_source_version_id = create_new_custom_app_source_version(
-        session, endpoint, source_name, runtime_params
+        session, endpoint, source_name
     )
     configure_custom_app_source_version(
         session=session,
@@ -207,6 +223,7 @@ def create_app_from_project(
         custom_app_source_version_id=custom_app_source_version_id,
         project=project_folder,
         base_env_version_id=base_env_version_id,
+        runtime_params=runtime_params,
     )
     app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
