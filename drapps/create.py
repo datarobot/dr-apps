@@ -111,7 +111,7 @@ def get_runtime_params(
                 {
                     'fieldName': key,
                     'value': value,
-                    'type': 'integer',
+                    'type': 'numeric',
                 }
             )
     return runtime_params
@@ -360,7 +360,7 @@ def parse_env_vars(ctx, param, value):
     help='String environment variable in the format KEY=VALUE',
 )
 @click.option(
-    '--intEnvVar',
+    '--numericEnvVar',
     multiple=True,
     required=False,
     type=click.STRING,
