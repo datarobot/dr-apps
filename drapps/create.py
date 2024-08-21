@@ -150,13 +150,7 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
 
 def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Tuple[Path, str]]:
     """
-    Extract the metadata.yaml file from the list of project files.
-
-    Args:
-    project_files (List[Tuple[Path, str]]): List of tuples containing absolute and relative paths of project files.
-
-    Returns:
-    Tuple[Path, str] | None: A tuple containing the absolute and relative paths of metadata.yaml if found, None otherwise.
+    Extract the metadata.yaml file from the list of project files..
     """
     for file_path, relative_path in project_files:
         if relative_path.lower() == 'metadata.yaml':
@@ -177,8 +171,8 @@ def configure_custom_app_source_version(
     project_files = get_project_files_list(project)
     # verify_metadata_and_runtime_params
     metadata_file = extract_metadata_yaml(project_files)
-    if metadata_file:
-        verify_runtime_env_vars(metadata_file, runtime_params)
+    if metadata_file and runtime_params:
+        valid_runtime_params = verify_runtime_env_vars(metadata_file, runtime_params)
     progress: ProgressBar  # type hinting badly needed by mypy
     with click.progressbar(length=len(project_files), label='Uploading project:') as progress:
         # grouping project files in chunks
@@ -190,7 +184,12 @@ def configure_custom_app_source_version(
             payload['file'] = files_streams
 
             update_application_source_version(
-                session, endpoint, custom_app_source_id, custom_app_source_version_id, payload
+                session,
+                endpoint,
+                custom_app_source_id,
+                custom_app_source_version_id,
+                payload,
+                valid_runtime_params,
             )
             # closing all streams after upload
             for files_stream in files_streams:
