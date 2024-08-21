@@ -1,7 +1,6 @@
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, Tuple
 
-import click
 import yaml
 
 
@@ -30,21 +29,20 @@ def read_metadata_yaml(metadata_file: Tuple[Path, str]) -> Dict[str, Any]:
         raise yaml.YAMLError(f"Error parsing metadata.yaml: {e}")
 
 
-def verify_runtime_env_vars(
-    metadata_file: Tuple[Path, str], runtime_env_vars: List[Dict]
-) -> Dict[str, Union[str, int]]:
+def verify_runtime_env_vars(metadata_file, runtime_env_vars):
     """
-    Verify that the runtime environment variables are valid and return the valid ones.
+    Verify that the runtime environment variables are valid.
 
     Args:
     metadata_file: The metadata file tuple (as returned by extract_metadata_yaml).
     runtime_env_vars: The runtime environment variables (as returned by get_runtime_params).
 
     Returns:
-    Dict[str, Union[str, int]]: A dictionary of valid runtime parameters.
+    Tuple[List[Dict], List[str]]: A tuple containing a list of valid runtime parameters
+    and a list of error messages for invalid parameters.
     """
     metadata_contents = read_metadata_yaml(metadata_file)
-    valid_params: Dict[str, Union[str, int]] = {}
+    valid_params = []
 
     # Create a dictionary of valid parameters from metadata for easy lookup
     valid_param_dict = {
@@ -54,26 +52,16 @@ def verify_runtime_env_vars(
 
     for param in runtime_env_vars:
         field_name = param['fieldName']
-        param_value = param['value']
         param_type = param['type']
 
-        if field_name in valid_param_dict and valid_param_dict[field_name] == param_type:
-            if param_type == 'integer':
-                try:
-                    valid_params[field_name] = int(param_value)
-                except ValueError:
-                    click.echo(
-                        f"Error: Invalid value for '{field_name}'. Expected integer, got '{param_value}'.",
-                        err=True,
-                    )
-            elif param_type == 'string':
-                valid_params[field_name] = param_value
+        if field_name in valid_param_dict:
+            if valid_param_dict[field_name] == param_type:
+                valid_params.append(param)
             else:
-                click.echo(
-                    f"Error: Invalid datatype for '{field_name}'. Can be either string or integer.",
-                    err=True,
+                print(
+                    f"Invalid type for '{field_name}'. Expected '{valid_param_dict[field_name]}', got '{param_type}'."
                 )
         else:
-            click.echo(f"Error: Invalid parameter: '{field_name}'.", err=True)
+            print(f"Undefined parameter: '{field_name}'.")
 
     return valid_params
