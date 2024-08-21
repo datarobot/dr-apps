@@ -1,5 +1,6 @@
+import json
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import yaml
 
@@ -7,16 +8,6 @@ import yaml
 def read_metadata_yaml(metadata_file: Tuple[Path, str]) -> Dict[str, Any]:
     """
     Read and parse the contents of the metadata.yaml file.
-
-    Args:
-    metadata_file (Tuple[Path, str]): A tuple containing the absolute and relative paths of metadata.yaml.
-
-    Returns:
-    Dict[str, Any]: A dictionary containing the parsed contents of the metadata.yaml file.
-
-    Raises:
-    FileNotFoundError: If the metadata file doesn't exist.
-    yaml.YAMLError: If there's an error parsing the YAML file.
     """
     absolute_path, _ = metadata_file
     try:
@@ -29,17 +20,9 @@ def read_metadata_yaml(metadata_file: Tuple[Path, str]) -> Dict[str, Any]:
         raise yaml.YAMLError(f"Error parsing metadata.yaml: {e}")
 
 
-def verify_runtime_env_vars(metadata_file, runtime_env_vars):
+def verify_runtime_env_vars(metadata_file, runtime_env_vars) -> List[str]:
     """
     Verify that the runtime environment variables are valid.
-
-    Args:
-    metadata_file: The metadata file tuple (as returned by extract_metadata_yaml).
-    runtime_env_vars: The runtime environment variables (as returned by get_runtime_params).
-
-    Returns:
-    Tuple[List[Dict], List[str]]: A tuple containing a list of valid runtime parameters
-    and a list of error messages for invalid parameters.
     """
     metadata_contents = read_metadata_yaml(metadata_file)
     valid_params = []
@@ -56,7 +39,7 @@ def verify_runtime_env_vars(metadata_file, runtime_env_vars):
 
         if field_name in valid_param_dict:
             if valid_param_dict[field_name] == param_type:
-                valid_params.append(param)
+                valid_params.append(f'[{json.dumps(param)}]')
             else:
                 print(
                     f"Invalid type for '{field_name}'. Expected '{valid_param_dict[field_name]}', got '{param_type}'."
