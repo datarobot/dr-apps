@@ -6,7 +6,7 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import posixpath
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from requests import Session
 
@@ -65,7 +65,12 @@ def create_application_source_version(
 
 
 def update_application_source_version(
-    session: Session, endpoint: str, source_id: str, version_id: str, payload: Dict[str, Any]
+    session: Session,
+    endpoint: str,
+    source_id: str,
+    version_id: str,
+    payload: Dict[str, Any],
+    runtime_params: Optional[List[str]],
 ):
     """Make a change to application source version."""
     url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
@@ -74,9 +79,13 @@ def update_application_source_version(
         files_data = payload.pop('file')
         files = [("file", file) for file in files_data]
         patch_params['files'] = files
-
     response = session.patch(url, **patch_params)
     handle_dr_response(response)
+
+    if runtime_params:
+        for param in runtime_params:
+            response = session.patch(url, json={'runtimeParameterValues': param})
+            handle_dr_response(response)
 
 
 def get_custom_app_source_versions_list(
