@@ -365,7 +365,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='Integer environment variable in the format KEY=VALUE',
+    help='Numeric environment variable in the format KEY=VALUE',
 )
 @click.argument('application_name', type=click.STRING, required=True)
 def create(
