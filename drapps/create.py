@@ -169,8 +169,9 @@ def configure_custom_app_source_version(
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
-    # verify_metadata_and_runtime_params
+
     metadata_file = extract_metadata_yaml(project_files)
+    valid_runtime_params = None
     if metadata_file and runtime_params:
         valid_runtime_params = verify_runtime_env_vars(metadata_file, runtime_params)
     progress: ProgressBar  # type hinting badly needed by mypy
