@@ -93,7 +93,7 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
 
 
 def get_runtime_params(
-    string_env_var: Optional[Dict[str, str]], integer_env_var: Optional[Dict[str, str]]
+    string_env_var: Optional[Dict[str, str]], numeric_env_var: Optional[Dict[str, str]]
 ) -> List[Dict]:
     runtime_params = []
     if string_env_var:
@@ -105,8 +105,8 @@ def get_runtime_params(
                     'type': 'string',
                 }
             )
-    if integer_env_var:
-        for key, value in integer_env_var.items():
+    if numeric_env_var:
+        for key, value in numeric_env_var.items():
             runtime_params.append(
                 {
                     'fieldName': key,
@@ -376,7 +376,7 @@ def create(
     image: Optional[Path],
     skip_wait: bool,
     stringenvvar: Optional[Dict[str, str]],
-    intenvvar: Optional[Dict[str, str]],
+    numericenvvar: Optional[Dict[str, str]],
     application_name: str,
 ) -> None:
     """
@@ -392,7 +392,7 @@ def create(
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 
-    runtime_params = get_runtime_params(stringenvvar, intenvvar)
+    runtime_params = get_runtime_params(stringenvvar, numericenvvar)
 
     if is_app_name_in_use(session, endpoint, application_name):
         message = f'Name {application_name} is used by other custom application'
