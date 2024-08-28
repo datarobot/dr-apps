@@ -169,7 +169,7 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN pip3 install --no-cache-dir 'streamlit==1.17.0' 'datarobot==3.0.2' 'plotly==5.13.0' 'streamlit-wordcloud==0.1.0' 'kaleido==0.2.1' 'tabulate==0.9.0' 'altair<5'
+RUN pip3 install --no-cache-dir 'streamlit==1.31.0' 'pillow==10.3.0' 'datarobot==3.0.2' 'plotly==5.13.0' 'streamlit-wordcloud==0.1.0' 'kaleido==0.2.1' 'tabulate==0.9.0' 'altair<5'
 
 WORKDIR /opt/code
 
