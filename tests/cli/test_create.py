@@ -5,7 +5,7 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
-
+import json
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,12 +16,6 @@ from click.testing import CliRunner
 from responses import matchers
 
 from drapps.create import create
-
-
-@pytest.fixture
-def entrypoint_script_content():
-    content = '#!/usr/bin/env bash\n' 'echo "We doing here something"'
-    return content
 
 
 @responses.activate
@@ -126,13 +120,20 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
 @pytest.mark.parametrize('use_environment_id', (False, True))
 @pytest.mark.parametrize('wait_till_ready', (False, True))
 def test_create_from_project(
-    api_endpoint_env, api_token_env, entrypoint_script_content, use_environment_id, wait_till_ready
+    api_endpoint_env,
+    api_token_env,
+    ee_id,
+    ee_last_version_id,
+    string_env_vars,
+    numeric_env_vars,
+    metadata_yaml_content,
+    entrypoint_script_content,
+    use_environment_id,
+    wait_till_ready,
 ):
     app_name = 'new_app'
     project_folder = 'project-folder'
     ee_name = 'ExecutionEnv'
-    ee_id = str(ObjectId())
-    ee_last_version_id = str(ObjectId())
 
     auth_matcher = matchers.header_matcher(
         {'Authorization': f'Bearer {api_token_env}'}
@@ -184,13 +185,37 @@ def test_create_from_project(
     )
     # request for uploading project data to source_version
     source_version_update_data_matcher = matchers.multipart_matcher(
-        {'file': ('start-app.sh', entrypoint_script_content)},
-        data={'baseEnvironmentVersionId': ee_last_version_id, 'filePath': ['start-app.sh']},
+        {
+            'file': [
+                ('start-app.sh', entrypoint_script_content),
+                ('metadata.yaml', metadata_yaml_content),
+            ]
+        },
+        data={
+            'baseEnvironmentVersionId': ee_last_version_id,
+            'filePath': ['start-app.sh', 'metadata.yaml'],
+        },
     )
     responses.patch(
         f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
         match=[auth_matcher, source_version_update_data_matcher],
     )
+
+    # Add response for runtime parameters
+    runtime_params = [
+        [{'fieldName': k, 'value': v, 'type': 'string'}] for k, v in string_env_vars.items()
+    ] + [
+        [{'fieldName': k, 'value': str(v), 'type': 'numeric'}] for k, v in numeric_env_vars.items()
+    ]
+
+    for param in runtime_params:
+        runtime_param_matcher = matchers.json_params_matcher(
+            {'runtimeParameterValues': json.dumps(param)}
+        )
+        responses.patch(
+            f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
+            match=[auth_matcher, runtime_param_matcher],
+        )
 
     # request for creating custom app
     status_check_url = 'http://ho.st/status/status_id'
@@ -244,6 +269,32 @@ def test_create_from_project(
 
     assert result.exit_code == 0, result.exception
     assert result.output == expected_output
+
+    # Add assertions to check if the environment variables were correctly passed
+    assert len(responses.calls) > 0
+    env_var_requests = [
+        call
+        for call in responses.calls
+        if call.request.url.endswith(f'/versions/{custom_app_source_version_id}/')
+        and call.request.method == 'PATCH'
+        and 'runtimeParameterValues' in call.request.body.decode('utf-8')
+    ]
+
+    assert len(env_var_requests) == len(string_env_vars) + len(
+        numeric_env_vars
+    ), "Not all environment variables were sent"
+
+    for call in env_var_requests:
+        body = json.loads(call.request.body.decode('utf-8'))
+        param = json.loads(body['runtimeParameterValues'])[0]
+        if param['fieldName'] in string_env_vars:
+            assert param['type'] == 'string'
+            assert param['value'] == string_env_vars[param['fieldName']]
+        elif param['fieldName'] in numeric_env_vars:
+            assert param['type'] == 'numeric'
+            assert param['value'] == str(numeric_env_vars[param['fieldName']])
+        else:
+            pytest.fail(f"Unexpected environment variable: {param['fieldName']}")
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
