@@ -235,9 +235,9 @@ def test_create_from_project(
         '--stringEnvVar',
         'API_KEY=Random API Key',
         '--numericEnvVar',
-        'MAX_RETRIES=3',
+        'INT_VAL=3',
         '--numericEnvVar',
-        'TIMEOUT=60',
+        'FLOAT_VAL=3.14',
     ]
     if not wait_till_ready:
         cli_parameters.append('--skip-wait')
@@ -277,7 +277,7 @@ def test_create_from_project(
             assert param['value'] == string_env_vars[param['fieldName']]
         elif param['fieldName'] in numeric_env_vars:
             assert param['type'] == 'numeric'
-            assert param['value'] == int(numeric_env_vars[param['fieldName']])
+            assert float(param['value']) == float(numeric_env_vars[param['fieldName']])
         else:
             pytest.fail(f"Unexpected environment variable: {param['fieldName']}")
 

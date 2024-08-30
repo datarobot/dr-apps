@@ -51,7 +51,7 @@ def string_env_vars():
 
 @pytest.fixture
 def numeric_env_vars():
-    return {'MAX_RETRIES': 3, 'TIMEOUT': 60}
+    return {'INT_VAL': 3, 'FLOAT_VAL': 3.14}
 
 
 @pytest.fixture
@@ -63,9 +63,9 @@ def metadata_yaml_content():
         type: string
       - fieldName: API_KEY
         type: string
-      - fieldName: MAX_RETRIES
+      - fieldName: INT_VAL
         type: numeric
-      - fieldName: TIMEOUT
+      - fieldName: FLOAT_VAL
         type: numeric
     """
 
