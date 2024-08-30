@@ -46,7 +46,7 @@ def ee_last_version_id():
 
 @pytest.fixture
 def string_env_vars():
-    return {'FOO': 'BAR', 'API_KEY': '1234abcd'}
+    return {'FOO': 'BAR', 'API_KEY': 'Random API Key'}
 
 
 @pytest.fixture
@@ -57,6 +57,8 @@ def numeric_env_vars():
 @pytest.fixture
 def metadata_yaml_content():
     return """
+    name: runtime-params
+    
     runtimeParameterDefinitions:
       - fieldName: FOO
         type: string
@@ -71,4 +73,5 @@ def metadata_yaml_content():
 
 @pytest.fixture
 def entrypoint_script_content():
-    return '#!/usr/bin/env bash\necho "We doing here something"'
+    content = '#!/usr/bin/env bash\n' 'echo "We doing here something"'
+    return content

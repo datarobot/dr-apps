@@ -183,39 +183,10 @@ def test_create_from_project(
         json={'id': custom_app_source_version_id},
         match=[auth_matcher, source_version_data_matcher],
     )
-    # request for uploading project data to source_version
-    source_version_update_data_matcher = matchers.multipart_matcher(
-        {
-            'file': [
-                ('start-app.sh', entrypoint_script_content),
-                ('metadata.yaml', metadata_yaml_content),
-            ]
-        },
-        data={
-            'baseEnvironmentVersionId': ee_last_version_id,
-            'filePath': ['start-app.sh', 'metadata.yaml'],
-        },
-    )
+
     responses.patch(
         f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
-        match=[auth_matcher, source_version_update_data_matcher],
     )
-
-    # Add response for runtime parameters
-    runtime_params = [
-        [{'fieldName': k, 'value': v, 'type': 'string'}] for k, v in string_env_vars.items()
-    ] + [
-        [{'fieldName': k, 'value': str(v), 'type': 'numeric'}] for k, v in numeric_env_vars.items()
-    ]
-
-    for param in runtime_params:
-        runtime_param_matcher = matchers.json_params_matcher(
-            {'runtimeParameterValues': json.dumps(param)}
-        )
-        responses.patch(
-            f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
-            match=[auth_matcher, runtime_param_matcher],
-        )
 
     # request for creating custom app
     status_check_url = 'http://ho.st/status/status_id'
@@ -253,7 +224,21 @@ def test_create_from_project(
         expected_output += f'Custom application {app_name} was successfully created.\n'
 
     environment_identifier = ee_id if use_environment_id else ee_name
-    cli_parameters = ['--base-env', environment_identifier, '--path', project_folder, app_name]
+    cli_parameters = [
+        '--base-env',
+        environment_identifier,
+        '--path',
+        project_folder,
+        app_name,
+        '--stringEnvVar',
+        'FOO=BAR',
+        '--stringEnvVar',
+        'API_KEY=Random API Key',
+        '--numericEnvVar',
+        'MAX_RETRIES=3',
+        '--numericEnvVar',
+        'TIMEOUT=60',
+    ]
     if not wait_till_ready:
         cli_parameters.append('--skip-wait')
 
@@ -263,6 +248,8 @@ def test_create_from_project(
         Path(project_folder).mkdir()
         with Path(project_folder, 'start-app.sh').open('w') as script_file:
             script_file.write(entrypoint_script_content)
+        with Path(project_folder, 'metadata.yaml').open('w') as meta_file:
+            meta_file.write(metadata_yaml_content)
 
         with patch('drapps.create.CHECK_STATUS_WAIT_TIME', 0):
             result = runner.invoke(create, cli_parameters)
@@ -280,9 +267,7 @@ def test_create_from_project(
         and 'runtimeParameterValues' in call.request.body.decode('utf-8')
     ]
 
-    assert len(env_var_requests) == len(string_env_vars) + len(
-        numeric_env_vars
-    ), "Not all environment variables were sent"
+    assert len(env_var_requests) == len(string_env_vars) + len(numeric_env_vars)
 
     for call in env_var_requests:
         body = json.loads(call.request.body.decode('utf-8'))
@@ -292,7 +277,7 @@ def test_create_from_project(
             assert param['value'] == string_env_vars[param['fieldName']]
         elif param['fieldName'] in numeric_env_vars:
             assert param['type'] == 'numeric'
-            assert param['value'] == str(numeric_env_vars[param['fieldName']])
+            assert param['value'] == int(numeric_env_vars[param['fieldName']])
         else:
             pytest.fail(f"Unexpected environment variable: {param['fieldName']}")
 
