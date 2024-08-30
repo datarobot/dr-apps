@@ -57,8 +57,7 @@ def numeric_env_vars():
 @pytest.fixture
 def metadata_yaml_content():
     return """
-    name: runtime-params
-    
+    name: runtime-params    # noqa: W291    
     runtimeParameterDefinitions:
       - fieldName: FOO
         type: string
