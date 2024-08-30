@@ -263,8 +263,8 @@ def test_create_from_project(
         call
         for call in responses.calls
         if call.request.url.endswith(f'/versions/{custom_app_source_version_id}/')
-        and call.request.method == 'PATCH'
-        and 'runtimeParameterValues' in call.request.body.decode('utf-8')
+        and call.request.method == 'PATCH'  # noqa: W503
+        and 'runtimeParameterValues' in call.request.body.decode('utf-8')  # noqa: W503
     ]
 
     assert len(env_var_requests) == len(string_env_vars) + len(numeric_env_vars)
