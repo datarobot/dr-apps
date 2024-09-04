@@ -51,7 +51,11 @@ CHECK_STATUS_WAIT_TIME = 5
 
 
 def validate_parameters(
-    base_env: Optional[str], path: Optional[Path], image: Optional[Path]
+    base_env: Optional[str],
+        path: Optional[Path],
+        image: Optional[Path],
+        stringenvvar: Optional[Dict[str, str]],
+        numericenvvar: Optional[Dict[str, str]],
 ) -> None:
     message = None
     if not (base_env or path or image):
@@ -68,6 +72,10 @@ def validate_parameters(
         message = (
             'Execution environment (base-env) and project folder (path) are '
             'both required for creating custom application.'
+        )
+    elif (stringenvvar or numericenvvar) and image:
+        message = (
+            'Custom runtime params does not support direct image upload.'
         )
 
     if message:
@@ -393,7 +401,7 @@ def create(
     If application created from project folder, custom application image will be created
     or existing will be updated.
     """
-    validate_parameters(base_env, path, image)
+    validate_parameters(base_env, path, image, stringenvvar, numericenvvar)
     if path:
         check_project(path)
 
