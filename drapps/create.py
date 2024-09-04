@@ -23,6 +23,7 @@ from .helpers.custom_app_sources_functions import (
     get_custom_app_source_by_name,
     get_custom_app_source_versions_list,
     update_application_source_version,
+    update_runtime_params,
 )
 from .helpers.custom_apps_functions import (
     FINAL_STATUSES,
@@ -148,13 +149,13 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
     return iter(lambda: tuple(islice(iterator, chunk_size)), ())
 
 
-def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Tuple[Path, str]]:
+def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Path]:
     """
     Extract the metadata.yaml file from the list of project files..
     """
     for file_path, relative_path in project_files:
-        if relative_path.lower() == 'metadata.yaml':
-            return (file_path, relative_path)
+        if relative_path == 'metadata.yaml':
+            return file_path
     return None
 
 
@@ -171,7 +172,7 @@ def configure_custom_app_source_version(
     project_files = get_project_files_list(project)
 
     metadata_file = extract_metadata_yaml(project_files)
-    valid_runtime_params = None
+    valid_runtime_params = []
     if metadata_file and runtime_params:
         valid_runtime_params = verify_runtime_env_vars(metadata_file, runtime_params)
     progress: ProgressBar  # type hinting badly needed by mypy
@@ -190,7 +191,6 @@ def configure_custom_app_source_version(
                 custom_app_source_id,
                 custom_app_source_version_id,
                 payload,
-                valid_runtime_params,
             )
             # closing all streams after upload
             for files_stream in files_streams:
@@ -199,6 +199,14 @@ def configure_custom_app_source_version(
 
             payload = {}
             progress.update(len(file_chunk))
+        # Finally, add runtime params
+        update_runtime_params(
+            session=session,
+            endpoint=endpoint,
+            source_id=custom_app_source_id,
+            version_id=custom_app_source_version_id,
+            runtime_params=valid_runtime_params,
+        )
 
 
 def create_app_from_project(

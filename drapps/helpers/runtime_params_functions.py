@@ -1,22 +1,21 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import click
 import yaml
 
 
-def read_metadata_yaml(metadata_file: Tuple[Path, str]) -> Dict[str, Any]:
+def read_metadata_yaml(metadata_file: Path) -> Dict[str, Any]:
     """
     Read and parse the contents of the metadata.yaml file.
     """
-    absolute_path, _ = metadata_file
     try:
-        with open(absolute_path, 'r') as file:
+        with open(metadata_file, 'r') as file:
             metadata = yaml.safe_load(file)
         return metadata
     except FileNotFoundError:
-        raise FileNotFoundError(f"metadata.yaml file not found at {absolute_path}")
+        raise FileNotFoundError(f"metadata.yaml file not found at {metadata_file}")
     except yaml.YAMLError as e:
         raise yaml.YAMLError(f"Error parsing metadata.yaml: {e}")
 
