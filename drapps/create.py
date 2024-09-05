@@ -23,6 +23,7 @@ from .helpers.custom_app_sources_functions import (
     get_custom_app_source_by_name,
     get_custom_app_source_versions_list,
     update_application_source_version,
+    update_runtime_params,
 )
 from .helpers.custom_apps_functions import (
     FINAL_STATUSES,
@@ -42,6 +43,7 @@ from .helpers.execution_environments_functions import (
     get_execution_environment_by_name,
     get_execution_environment_version_by_id,
 )
+from .helpers.runtime_params_functions import verify_runtime_env_vars
 from .helpers.wrappers import api_endpoint, api_token
 
 UPLOAD_CHUNK_SIZE = 50
@@ -49,7 +51,11 @@ CHECK_STATUS_WAIT_TIME = 5
 
 
 def validate_parameters(
-    base_env: Optional[str], path: Optional[Path], image: Optional[Path]
+    base_env: Optional[str],
+    path: Optional[Path],
+    image: Optional[Path],
+    stringenvvar: Optional[Dict[str, str]],
+    numericenvvar: Optional[Dict[str, str]],
 ) -> None:
     message = None
     if not (base_env or path or image):
@@ -67,6 +73,8 @@ def validate_parameters(
             'Execution environment (base-env) and project folder (path) are '
             'both required for creating custom application.'
         )
+    elif (stringenvvar or numericenvvar) and image:
+        message = 'Custom runtime params does not support direct image upload.'
 
     if message:
         raise click.UsageError(message)
@@ -91,8 +99,35 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
     return env['latestVersion']['id']
 
 
+def get_runtime_params(
+    string_env_var: Optional[Dict[str, str]], numeric_env_var: Optional[Dict[str, str]]
+) -> List[Dict]:
+    runtime_params = []
+    if string_env_var:
+        for key, value in string_env_var.items():
+            runtime_params.append(
+                {
+                    'fieldName': key,
+                    'value': value,
+                    'type': 'string',
+                }
+            )
+    if numeric_env_var:
+        for key, value in numeric_env_var.items():
+            runtime_params.append(
+                {
+                    'fieldName': key,
+                    'value': value,
+                    'type': 'numeric',
+                }
+            )
+    return runtime_params
+
+
 def create_new_custom_app_source_version(
-    session: Session, endpoint: str, source_name: str
+    session: Session,
+    endpoint: str,
+    source_name: str,
 ) -> Tuple[str, str]:
     try:
         app_source = get_custom_app_source_by_name(session, endpoint, source_name)
@@ -120,6 +155,16 @@ def split_list_into_chunks(iterable: List[Any], chunk_size: int) -> Iterator[Tup
     return iter(lambda: tuple(islice(iterator, chunk_size)), ())
 
 
+def extract_metadata_yaml(project_files: List[Tuple[Path, str]]) -> Optional[Path]:
+    """
+    Extract the metadata.yaml file from the list of project files..
+    """
+    for file_path, relative_path in project_files:
+        if relative_path == 'metadata.yaml':
+            return file_path
+    return None
+
+
 def configure_custom_app_source_version(
     session: Session,
     endpoint: str,
@@ -127,10 +172,15 @@ def configure_custom_app_source_version(
     custom_app_source_version_id: str,
     project: Path,
     base_env_version_id: str,
+    runtime_params: List[Dict],
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
 
+    metadata_file = extract_metadata_yaml(project_files)
+    valid_runtime_params = []
+    if metadata_file and runtime_params:
+        valid_runtime_params = verify_runtime_env_vars(metadata_file, runtime_params)
     progress: ProgressBar  # type hinting badly needed by mypy
     with click.progressbar(length=len(project_files), label='Uploading project:') as progress:
         # grouping project files in chunks
@@ -142,7 +192,11 @@ def configure_custom_app_source_version(
             payload['file'] = files_streams
 
             update_application_source_version(
-                session, endpoint, custom_app_source_id, custom_app_source_version_id, payload
+                session,
+                endpoint,
+                custom_app_source_id,
+                custom_app_source_version_id,
+                payload,
             )
             # closing all streams after upload
             for files_stream in files_streams:
@@ -151,10 +205,23 @@ def configure_custom_app_source_version(
 
             payload = {}
             progress.update(len(file_chunk))
+        # Finally, add runtime params
+        update_runtime_params(
+            session=session,
+            endpoint=endpoint,
+            source_id=custom_app_source_id,
+            version_id=custom_app_source_version_id,
+            runtime_params=valid_runtime_params,
+        )
 
 
 def create_app_from_project(
-    session: Session, endpoint: str, base_env: str, project_folder: Path, app_name: str
+    session: Session,
+    endpoint: str,
+    base_env: str,
+    project_folder: Path,
+    app_name: str,
+    runtime_params: List[Dict],
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
@@ -168,6 +235,7 @@ def create_app_from_project(
         custom_app_source_version_id=custom_app_source_version_id,
         project=project_folder,
         base_env_version_id=base_env_version_id,
+        runtime_params=runtime_params,
     )
     app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
@@ -255,6 +323,17 @@ def wait_for_custom_app_spinning(session: Session, status_check_url: str) -> str
             sleep(CHECK_STATUS_WAIT_TIME)
 
 
+def parse_env_vars(ctx, param, value):
+    res = {}
+    try:
+        for x in value:
+            key, val = x.split('=')
+            res[key] = val
+        return res
+    except ValueError:
+        raise click.BadParameter('Environment variables must be in the format KEY=VALUE')
+
+
 @click.command()
 @api_token
 @api_endpoint
@@ -286,6 +365,22 @@ def wait_for_custom_app_spinning(session: Session, status_check_url: str) -> str
     default=False,
     help='Do not wait for ready status.',
 )
+@click.option(
+    '--stringEnvVar',
+    multiple=True,
+    required=False,
+    type=click.STRING,
+    callback=parse_env_vars,
+    help='String environment variable in the format KEY=VALUE',
+)
+@click.option(
+    '--numericEnvVar',
+    multiple=True,
+    required=False,
+    type=click.STRING,
+    callback=parse_env_vars,
+    help='Numeric environment variable in the format KEY=VALUE',
+)
 @click.argument('application_name', type=click.STRING, required=True)
 def create(
     token: str,
@@ -294,6 +389,8 @@ def create(
     path: Optional[Path],
     image: Optional[Path],
     skip_wait: bool,
+    stringenvvar: Optional[Dict[str, str]],
+    numericenvvar: Optional[Dict[str, str]],
     application_name: str,
 ) -> None:
     """
@@ -302,12 +399,14 @@ def create(
     If application created from project folder, custom application image will be created
     or existing will be updated.
     """
-    validate_parameters(base_env, path, image)
+    validate_parameters(base_env, path, image, stringenvvar, numericenvvar)
     if path:
         check_project(path)
 
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
+
+    runtime_params = get_runtime_params(stringenvvar, numericenvvar)
 
     if is_app_name_in_use(session, endpoint, application_name):
         message = f'Name {application_name} is used by other custom application'
@@ -324,6 +423,7 @@ def create(
             base_env=base_env,  # type: ignore[arg-type]
             project_folder=path,  # type: ignore[arg-type]
             app_name=application_name,
+            runtime_params=runtime_params,
         )
 
     if skip_wait or not app_data.get('statusUrl'):

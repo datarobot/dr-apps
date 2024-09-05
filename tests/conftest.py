@@ -7,6 +7,7 @@
 #
 
 import pytest
+from bson import ObjectId
 
 
 @pytest.fixture
@@ -31,3 +32,45 @@ def api_token_env(monkeypatch, api_token):
     with monkeypatch.context() as mp:
         mp.setenv('DATAROBOT_API_TOKEN', api_token)
         yield api_token
+
+
+@pytest.fixture
+def ee_id():
+    return str(ObjectId())
+
+
+@pytest.fixture
+def ee_last_version_id():
+    return str(ObjectId())
+
+
+@pytest.fixture
+def string_env_vars():
+    return {'FOO': 'BAR', 'API_KEY': 'Random API Key'}
+
+
+@pytest.fixture
+def numeric_env_vars():
+    return {'INT_VAL': 3, 'FLOAT_VAL': 3.14}
+
+
+@pytest.fixture
+def metadata_yaml_content():
+    return """
+    name: runtime-params    # noqa: W291    
+    runtimeParameterDefinitions:
+      - fieldName: FOO
+        type: string
+      - fieldName: API_KEY
+        type: string
+      - fieldName: INT_VAL
+        type: numeric
+      - fieldName: FLOAT_VAL
+        type: numeric
+    """
+
+
+@pytest.fixture
+def entrypoint_script_content():
+    content = '#!/usr/bin/env bash\n' 'echo "We doing here something"'
+    return content

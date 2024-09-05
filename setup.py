@@ -30,7 +30,7 @@ tests_require = [
     'plotly == 5.22',
     'streamlit_wordcloud == 0.1.0',
     'kaleido==0.2.1',
-    'pillow==10.3.0'
+    'pillow==10.3.0',
 ]
 
 setup(
