@@ -316,7 +316,8 @@ def test_create_from_project(
         and 'resourceLabel' in call.request.body.decode('utf-8')  # noqa: W503
     ]
     assert len(cpu_sz_requests) == 1
-    assert f'{{"resourceLabel":"cpu.nano"}}'.encode() in cpu_sz_requests[0].request.body
+    # NOTE: We have to map 2xsmall -> nano
+    assert '{"resourceLabel":"cpu.nano"}'.encode() in cpu_sz_requests[0].request.body
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
