@@ -390,8 +390,24 @@ def parse_env_vars(ctx, param, value):
 @click.option(
     '--cpu-size',
     required=False,
-    type=click.Choice(['nano', 'micro', 'small', 'medium', 'large', 'xlarge', '2xlarge']),
+    type=click.Choice(['2xsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge', '2xlarge']),
     default='small',
+    help=(
+        # This string must be 39 characters because it gets post-processed
+        ''.join(
+            "{:<14} | {:<10} | {:<13}".format(*t)
+            for t in [
+                ('Option Name', 'CPUs', 'RAM'),
+                ('2xsmall', 1, '128 MB'),
+                ('xsmall', 1, '256 MB'),
+                ('small', 1, '512 MB'),
+                ('medium', 1, '1 GB'),
+                ('large', 2, '1.5 GB'),
+                ('xlarge', 2, '2 GB'),
+                ('2xlarge', 2, '3 GB'),
+            ]
+        )
+    ),
 )
 @click.option(
     '--skip-wait',

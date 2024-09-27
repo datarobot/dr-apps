@@ -116,6 +116,10 @@ def update_cpu_size(
     version_id: str,
     cpu_size: str,
 ):
+    if cpu_size == '2xsmall':
+        cpu_size = 'nano'
+    elif cpu_size == 'xsmall':
+        cpu_size = 'micro'
     url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
     form_data = {"resources": (None, f'{{"resourceLabel":"cpu.{cpu_size}"}}', 'application/json')}
     rsp = session.patch(url, files=form_data)

@@ -143,7 +143,7 @@ def test_create_from_project(
         So rather than use a form-data matcher, it makes more sense to just check it after the test run.
     """
     n_instances = 2
-    desired_cpu_size = 'large'
+    desired_cpu_size = '2xsmall'
     app_name = 'new_app'
     project_folder = 'project-folder'
     ee_name = 'ExecutionEnv'
@@ -316,9 +316,7 @@ def test_create_from_project(
         and 'resourceLabel' in call.request.body.decode('utf-8')  # noqa: W503
     ]
     assert len(cpu_sz_requests) == 1
-    assert (
-        f'{{"resourceLabel":"cpu.{desired_cpu_size}"}}'.encode() in cpu_sz_requests[0].request.body
-    )
+    assert f'{{"resourceLabel":"cpu.nano"}}'.encode() in cpu_sz_requests[0].request.body
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
