@@ -109,6 +109,19 @@ def update_num_replicas(
     handle_dr_response(rsp)
 
 
+def update_cpu_size(
+    session: Session,
+    endpoint: str,
+    source_id: str,
+    version_id: str,
+    cpu_size: str,
+):
+    url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
+    form_data = {"resources": (None, f'{{"resourceLabel":"cpu.{cpu_size}"}}', 'application/json')}
+    rsp = session.patch(url, files=form_data)
+    handle_dr_response(rsp)
+
+
 def get_custom_app_source_versions_list(
     session: Session, endpoint: str, source_id: str
 ) -> List[Dict[str, Any]]:

@@ -23,6 +23,7 @@ from .helpers.custom_app_sources_functions import (
     get_custom_app_source_by_name,
     get_custom_app_source_versions_list,
     update_application_source_version,
+    update_cpu_size,
     update_num_replicas,
     update_runtime_params,
 )
@@ -175,6 +176,7 @@ def configure_custom_app_source_version(
     base_env_version_id: str,
     runtime_params: List[Dict],
     replicas: int,
+    cpu_size: str,
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
@@ -215,6 +217,14 @@ def configure_custom_app_source_version(
             version_id=custom_app_source_version_id,
             replicas=replicas,
         )
+        # Add CPU Tee-Shirt Size
+        update_cpu_size(
+            session=session,
+            endpoint=endpoint,
+            source_id=custom_app_source_id,
+            version_id=custom_app_source_version_id,
+            cpu_size=cpu_size,
+        )
         # Finally, add runtime params
         update_runtime_params(
             session=session,
@@ -233,6 +243,7 @@ def create_app_from_project(
     app_name: str,
     runtime_params: List[Dict],
     replicas: int,
+    cpu_size: str,
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
@@ -248,6 +259,7 @@ def create_app_from_project(
         base_env_version_id=base_env_version_id,
         runtime_params=runtime_params,
         replicas=replicas,
+        cpu_size=cpu_size,
     )
     app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
@@ -378,6 +390,12 @@ def parse_env_vars(ctx, param, value):
     help='Number of replicas to be created.',
 )
 @click.option(
+    '--cpu-size',
+    required=False,
+    type=click.Choice(['nano', 'micro', 'small', 'medium', 'large', 'xlarge', '2xlarge']),
+    default='small',
+)
+@click.option(
     '--skip-wait',
     is_flag=True,
     show_default=True,
@@ -412,6 +430,7 @@ def create(
     numericenvvar: Optional[Dict[str, str]],
     application_name: str,
     replicas: int,
+    cpu_size: str,
 ) -> None:
     """
     Creates new custom application from docker image or base environment.
@@ -445,6 +464,7 @@ def create(
             app_name=application_name,
             runtime_params=runtime_params,
             replicas=replicas,
+            cpu_size=cpu_size,
         )
 
     if skip_wait or not app_data.get('statusUrl'):
