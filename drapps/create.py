@@ -23,6 +23,7 @@ from .helpers.custom_app_sources_functions import (
     get_custom_app_source_by_name,
     get_custom_app_source_versions_list,
     update_application_source_version,
+    update_num_replicas,
     update_runtime_params,
 )
 from .helpers.custom_apps_functions import (
@@ -173,6 +174,7 @@ def configure_custom_app_source_version(
     project: Path,
     base_env_version_id: str,
     runtime_params: List[Dict],
+    replicas: int,
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
@@ -205,6 +207,14 @@ def configure_custom_app_source_version(
 
             payload = {}
             progress.update(len(file_chunk))
+        # Add replicas to request (If we specified any)
+        update_num_replicas(
+            session=session,
+            endpoint=endpoint,
+            source_id=custom_app_source_id,
+            version_id=custom_app_source_version_id,
+            replicas=replicas,
+        )
         # Finally, add runtime params
         update_runtime_params(
             session=session,
@@ -222,6 +232,7 @@ def create_app_from_project(
     project_folder: Path,
     app_name: str,
     runtime_params: List[Dict],
+    replicas: int,
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
@@ -236,6 +247,7 @@ def create_app_from_project(
         project=project_folder,
         base_env_version_id=base_env_version_id,
         runtime_params=runtime_params,
+        replicas=replicas,
     )
     app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
@@ -359,6 +371,13 @@ def parse_env_vars(ctx, param, value):
     help='Path to tar archive with custom application docker images.',
 )
 @click.option(
+    '--replicas',
+    required=False,
+    type=click.INT,
+    default=1,
+    help='Number of replicas to be created.',
+)
+@click.option(
     '--skip-wait',
     is_flag=True,
     show_default=True,
@@ -392,6 +411,7 @@ def create(
     stringenvvar: Optional[Dict[str, str]],
     numericenvvar: Optional[Dict[str, str]],
     application_name: str,
+    replicas: int,
 ) -> None:
     """
     Creates new custom application from docker image or base environment.
@@ -424,6 +444,7 @@ def create(
             project_folder=path,  # type: ignore[arg-type]
             app_name=application_name,
             runtime_params=runtime_params,
+            replicas=replicas,
         )
 
     if skip_wait or not app_data.get('statusUrl'):
