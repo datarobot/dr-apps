@@ -209,7 +209,6 @@ def configure_custom_app_source_version(
 
             payload = {}
             progress.update(len(file_chunk))
-        # Add replicas to request (If we specified any)
         update_num_replicas(
             session=session,
             endpoint=endpoint,
@@ -217,7 +216,6 @@ def configure_custom_app_source_version(
             version_id=custom_app_source_version_id,
             replicas=replicas,
         )
-        # Add CPU Tee-Shirt Size
         update_cpu_size(
             session=session,
             endpoint=endpoint,
