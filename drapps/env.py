@@ -29,7 +29,7 @@ from .helpers.wrappers import api_endpoint, api_token
 @click.option(
     '-i',
     '--dockerfilezip',
-    required=False,
+    required=True,
     type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=Path),
     help='Path to tar archive which contains dockerfile',
 )
