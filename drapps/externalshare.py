@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 import click
 from bson import ObjectId
@@ -55,7 +55,7 @@ def external_share(
             current_external_users.update(set(add_external_user))
         if remove_external_user:
             current_external_users.difference_update(set(remove_external_user))
-        payload['externalAccessEnabled'] = list(current_external_users)
+        payload['externalAccessRecipients'] = list(current_external_users)
 
     update_running_custom_app(
         session=session,
