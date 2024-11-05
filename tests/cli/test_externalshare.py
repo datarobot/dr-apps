@@ -16,7 +16,7 @@ logger = logging.getLogger()
 @pytest.mark.parametrize('use_name', [True, False])
 @pytest.mark.parametrize('allow_external_sharing', [True, False])
 @pytest.mark.parametrize('users_to_add', [['new.user.1@datarobot.com', 'new.user.2@datarobot.com']])
-@pytest.mark.parametrize('users_to_remove', ['@enron.com'])
+@pytest.mark.parametrize('users_to_remove', ['@some-external-domain.com'])
 def test_set_external_sharing(
     api_token_env,
     api_endpoint_env,
