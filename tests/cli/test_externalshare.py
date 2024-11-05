@@ -45,7 +45,7 @@ def test_set_external_sharing(
         'externalAccessRecipients': [
             'existing.user.1@datarobot.com',
             'existing.user.2@datarobot.com',
-            '@enron.com',
+            '@some-external-domain.com',
         ],
     }
     expected_external_access_recipients = set(app['externalAccessRecipients'])
