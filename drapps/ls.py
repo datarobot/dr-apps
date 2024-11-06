@@ -36,6 +36,10 @@ def _date_fetcher(field_name: str, entity) -> str:
         return date.date().isoformat()
 
 
+def _list_str_fetcher(field_name: str, entity) -> str:
+    return ','.join(entity.get(field_name))
+
+
 def format_table(
     data: List[Dict[str, Any]], data_fetchers: Dict[str, Callable[[Dict[str, Any]], str]]
 ) -> str:
@@ -58,6 +62,8 @@ def list_apps(session: Session, endpoint: str, id_only: bool) -> str:
         'status': partial(_string_fetcher, 'status'),
         'updated': partial(_date_fetcher, 'updatedAt'),
         'URL': partial(_string_fetcher, 'applicationUrl'),
+        'external sharing': partial(_string_fetcher, 'externalAccessEnabled'),
+        'external sharing recipients': partial(_list_str_fetcher, 'externalAccessRecipients'),
     }
     return format_table(apps, data_fetchers)  # type: ignore[arg-type]
 

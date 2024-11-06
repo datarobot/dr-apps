@@ -29,6 +29,8 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
                 'envVersionId': '659964572522de6a026de5cf',
                 # make it current day, so we see time in results
                 'updatedAt': datetime.today().replace(hour=11, minute=59, second=59).isoformat(),
+                'externalAccessEnabled': True,
+                'externalAccessRecipients': ['ben@datarobot.com', 'ben2@datarobot.com'],
             },
             {
                 'id': '659964182522de6a026de5cd',
@@ -37,6 +39,8 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
                 'applicationUrl': 'http://ho.st/custom_applications/659964182522de6a026de5cd/',
                 'envVersionId': '659964572522de6a026de5d0',
                 'updatedAt': '2023-11-12 14:12:46.092000',
+                'externalAccessEnabled': False,
+                'externalAccessRecipients': [],
             },
             {
                 'id': '659964382522de6a026de5ce',
@@ -45,6 +49,8 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
                 'applicationUrl': 'http://ho.st/custom_applications/659964382522de6a026de5ce/',
                 'envVersionId': '659964572522de6a026de5d1',
                 'updatedAt': '2024-01-28 14:12:46.092000',
+                'externalAccessEnabled': False,
+                'externalAccessRecipients': [],
             },
         ],
     }
@@ -54,11 +60,11 @@ def test_ls_apps(api_endpoint_env, api_token_env, ids_only):
         )
     else:
         expected_output = (
-            'id                        name    status    updated     URL\n'
-            '------------------------  ------  --------  ----------  ----------------------------------------------------------\n'
-            '65980d79eea4fd0eddd59bba  App 1   running   11:59:59    http://ho.st/custom_applications/65980d79eea4fd0eddd59bba/\n'
-            '659964182522de6a026de5cd  App 2   running   2023-11-12  http://ho.st/custom_applications/659964182522de6a026de5cd/\n'
-            '659964382522de6a026de5ce  App 3   running   2024-01-28  http://ho.st/custom_applications/659964382522de6a026de5ce/\n'
+            'id                        name    status    updated     URL                                                         external sharing    external sharing recipients\n'
+            '------------------------  ------  --------  ----------  ----------------------------------------------------------  ------------------  ------------------------------------\n'
+            '65980d79eea4fd0eddd59bba  App 1   running   11:59:59    http://ho.st/custom_applications/65980d79eea4fd0eddd59bba/  True                ben@datarobot.com,ben2@datarobot.com\n'
+            '659964182522de6a026de5cd  App 2   running   2023-11-12  http://ho.st/custom_applications/659964182522de6a026de5cd/  False\n'
+            '659964382522de6a026de5ce  App 3   running   2024-01-28  http://ho.st/custom_applications/659964382522de6a026de5ce/  False\n'
         )
 
     app_list_url = f'{api_endpoint_env}/customApplications/'
