@@ -8,7 +8,7 @@ import streamlit as st
 from datarobot import TARGET_TYPE, BatchPredictionJob, Deployment, Project
 from datarobot.client import Client, get_client
 
-from .caches import get_model
+from .caches import get_model, get_deployment
 
 
 def is_deployment_serverless(deployment: Deployment) -> bool:
@@ -86,7 +86,8 @@ def _camelCase_keys_to_snake_case_keys(data: Union[Dict[str, Any], List]):
 
 
 @st.cache_data
-def submit_batch_prediction(deployment: Deployment, df: pd.DataFrame, max_explanations: int):
+def submit_batch_prediction(deployment_id: str, df: pd.DataFrame, max_explanations: int):
+    deployment = get_deployment(deployment_id)
     [_, result] = BatchPredictionJob.score_pandas(
         deployment=deployment,
         df=df,

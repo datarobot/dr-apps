@@ -87,7 +87,7 @@ def create_prediction_form(
         if v:
             if use_batch_prediction_api:
                 return submit_batch_prediction(
-                    deployment, pandas.DataFrame.from_dict(pred), max_explanations
+                    deployment.id, pandas.DataFrame.from_dict(pred), max_explanations
                 )
             else:
                 return submit_prediction(

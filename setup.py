@@ -41,7 +41,7 @@ setup(
     url='https://github.com/datarobot/{}'.format(REPO_NAME),
     packages=find_packages(exclude=['examples']),
     package_dir={NAME: NAME},
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require={'test': tests_require},
@@ -49,8 +49,6 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

@@ -159,10 +159,7 @@ def main():
         if deployment_id:
             page_names_to_funcs["Predictor Demo"] = predictor_app
 
-        st.sidebar.markdown(
-            datarobot_logo(),
-            unsafe_allow_html=True,
-        )
+        st.logo('./dr-logo.svg')
         demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
         page_names_to_funcs[demo_name]()
 

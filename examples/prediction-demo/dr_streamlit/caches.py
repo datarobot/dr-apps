@@ -39,11 +39,11 @@ def initialize_and_get_feature_impact(
     try:
         return get_feature_impact()
     except ClientError as ce:
-        if 'No feature impact data found for model' in ce.json['message']:
+        if 'message' in ce.json and 'No feature impact data found for model' in ce.json['message']:
             fi_job = model.request_feature_impact()
             fi_job.wait_for_completion()
             return get_feature_impact()
-        elif 'Feature Impact is in progress' in ce.json['message']:
+        elif 'message' in ce.json and 'Feature Impact is in progress' in ce.json['message']:
             fi_job = FeatureImpactJob.get(project_id, ce.json['jobId'], with_metadata=False)
             fi_job.wait_for_completion()
             return get_feature_impact()

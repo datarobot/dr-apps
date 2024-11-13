@@ -61,7 +61,7 @@ def derived_features_chart(
             height=height,
             width=width,
         )
-        return st.plotly_chart(fig)
+        return st.plotly_chart(fig, use_container_width=True)
     else:
         feature_impact = _get_aggregated_feature_impact_data(
             project_id=project_id, model_id=model_id
@@ -75,4 +75,4 @@ def derived_features_chart(
             .mark_bar()
             .encode(y=alt.Y('featureName', sort='-x'), x=alt.X('impactNormalized'))
         )
-        return st.altair_chart(c)
+        return st.altair_chart(c, use_container_width=True)

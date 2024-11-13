@@ -1,16 +1,4 @@
-import base64
-
-
-def datarobot_logo(icon_color='#181D21', data_color='#181D21', robot_color='#428BCA'):
-    """
-    A little confusing here:
-     🤖DataRobot
-     🤖 => icon_color
-     Data => data_color
-     Robot => robot_color
-    """
-
-    datarobot_svg = f"""<svg width="120" height="18" viewBox="0 0 120 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="120" height="18" viewBox="0 0 120 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M9.33367 16.0003H0V18H9.33367V16.0003Z" fill="white"/>
     <path d="M14.0004 14.0005H9.33361V16.0003H14.0004V14.0005Z" fill="white"/>
     <path d="M9.33367 12.0008H0V14.0005H9.33367V12.0008Z" fill="white"/>
@@ -39,6 +27,3 @@ def datarobot_logo(icon_color='#181D21', data_color='#181D21', robot_color='#428
     <path d="M37.5284 14.1826C38.8795 12.9763 39.5655 11.2332 39.5655 9.00478C39.5655 6.77637 38.9005 5.07064 37.5284 3.84093C36.1634 2.62055 34.362 2.00219 32.1732 2.00219H28.1667V16.0027H32.1732C34.4133 16.0027 36.1657 15.4077 37.5284 14.185V14.1826ZM30.1758 3.81059H32.2129C35.58 3.81059 37.5121 5.70299 37.5121 9.00478C37.5121 12.3066 35.615 14.164 32.3016 14.199V14.2036H30.1758V3.81059Z"
           fill="white"/>
 </svg>
-"""
-    newline = '\n'
-    return f"""<img src="data:image/svg+xml;base64,{base64.encodebytes(datarobot_svg.encode()).decode().replace(newline, "")}" alt="SVG Image">"""
