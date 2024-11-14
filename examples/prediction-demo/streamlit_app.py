@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 from datarobot import TARGET_TYPE, Client
 from datarobot.client import set_client
+
 from dr_streamlit import (
     create_prediction_form,
     derived_features_chart,
@@ -16,10 +17,10 @@ from dr_streamlit import (
     text_feature_dropdown_menu,
     wordcloud_chart,
 )
-from dr_streamlit.datarobot_branding import datarobot_logo
 
 deployment_id = os.getenv('deploymentid')
 project_id = os.getenv('projectid')
+logo_path = os.path.join(os.path.dirname(__file__), 'dr-logo.svg')
 
 
 def intro():
@@ -159,10 +160,7 @@ def main():
         if deployment_id:
             page_names_to_funcs["Predictor Demo"] = predictor_app
 
-        st.sidebar.markdown(
-            datarobot_logo(),
-            unsafe_allow_html=True,
-        )
+        st.logo(logo_path)
         demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
         page_names_to_funcs[demo_name]()
 

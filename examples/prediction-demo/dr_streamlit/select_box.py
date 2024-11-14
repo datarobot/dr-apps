@@ -46,7 +46,7 @@ def text_feature_dropdown_menu(project_id: str) -> str:
 
 @st.cache_data
 def _get_models(project_id: str) -> List[str]:
-    return [model.id for model in Project(project_id).get_models()]
+    return [model.id for model in Project(project_id).get_model_records()]
 
 
 def project_model_dropdown(project_id: str) -> str:

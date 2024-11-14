@@ -17,10 +17,11 @@ pip install git+https://github.com/datarobot/dr-apps
 ### For contributors
 
 To install the DRApps CLI tool, clone this
-respository and then install package by running the following command:
+repository and then install the package by running the following command:
 
 ```sh
-python setup.py install
+# If your environment does not already have `build` then run `pip install build` first
+python -m build
 ```
 
 ## For Windows Users
@@ -31,7 +32,7 @@ For Windows users, you may need to interface with the DR Custom Apps CLI via mod
 python -m drapps <your_commands_here>
 ```
 
-If you have issues entering words with spaces ( eg: `-e "[Experimental] Python 3.9 Streamlit"` )
+If you have issues entering words with spaces ( eg: `-e "[DataRobot] Python 3.12 Applications Base"` )
 then you may find that using ids is a little easier.
 
 ## Use the DRApps CLI
@@ -176,18 +177,17 @@ Options:
 
 ### Create a new Execution Environment
 
-It may be the case that your version of DataRobot (eg Single Tenant SAAS or On-Prem) was not shipped with the `[Experimental] Python 3.9 Streamlit`
+It may be the case that your version of DataRobot (eg Single Tenant SAAS or On-Prem) was not shipped with the `[DataRobot] Python 3.12 Applications Base`
 or that you want to make a new execution environment for your apps (eg you want to make a Flask app, or you want your base docker image
 to have some packages installed in it that don't come standard
 
-First you will need to make a dockerfile. For the default `[Experimental] Python 3.9 Streamlit` env we use:
+First you will need to make a dockerfile. For the default `[DataRobot] Python 3.12 Applications Base` env we use:
 
 ```dockerfile
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-WORKDIR /app
-
-RUN pip3 install --no-cache-dir 'streamlit==1.31.0' 'pillow==10.3.0' 'datarobot==3.0.2' 'plotly==5.13.0' 'streamlit-wordcloud==0.1.0' 'kaleido==0.2.1' 'tabulate==0.9.0' 'altair<5'
+# This makes print statements show up in the logs API
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /opt/code
 
@@ -198,7 +198,7 @@ That dockerfile will then need to be archived into a zip file. For this example 
 Once you have the file zipped, and you open a terminal in the directory you can use the apps CLI:
 
 ```
-drapps create-env --dockerfilezip dockerfile.zip --name "[Experimental] Python 3.9 Streamlit"
+drapps create-env --dockerfilezip dockerfile.zip --name "[DataRobot] Python 3.12 Applications Base"
 ```
 
 ## Deploy an example app
@@ -207,7 +207,7 @@ To test this, deploy an example Streamlit app using the following command from
 the root directory of this repo:
 
 ```sh
-drapps create -t <your_api_token> -e "[Experimental] Python 3.9 Streamlit" -p ./demo-streamlit DemoApp
+drapps create -t <your_api_token> -e "[DataRobot] Python 3.12 Applications Base" -p ./demo-streamlit DemoApp
 ```
 
 This example script works as follows:

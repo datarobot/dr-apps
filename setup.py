@@ -25,12 +25,14 @@ tests_require = [
     'types-requests==2.28.11',
     'types-tabulate==0.9.0.20240106',
     'types-python-dateutil==2.8.19.20240106',
-    'streamlit == 1.35.0',
-    'datarobot == 3.4.0',
-    'plotly == 5.22',
-    'streamlit_wordcloud == 0.1.0',
+    'streamlit==1.40.0',
+    'datarobot==3.5.2',
+    'plotly==5.24.1',
     'kaleido==0.2.1',
-    'pillow==10.3.0',
+    'tabulate==0.9.0',
+    'altair==5.4.1',
+    'pillow==11.0.0',
+    'wordcloud>=1.9.4',
 ]
 
 setup(
@@ -41,7 +43,7 @@ setup(
     url='https://github.com/datarobot/{}'.format(REPO_NAME),
     packages=find_packages(exclude=['examples']),
     package_dir={NAME: NAME},
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=install_requires,
     tests_require=tests_require,
     extras_require={'test': tests_require},
@@ -49,8 +51,6 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
