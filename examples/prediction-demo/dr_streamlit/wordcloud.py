@@ -1,8 +1,8 @@
 from typing import Any, Dict, Optional
 
-import wordcloud
 import matplotlib.pyplot as plt
 import streamlit as st
+import wordcloud
 from datarobot import Model
 from datarobot.errors import ClientError
 from datarobot.models.word_cloud import WordCloud
@@ -17,12 +17,12 @@ def _get_word_cloud_data(project_id, model_id, exclude_stop_words=False) -> Word
 
 
 def wordcloud_chart(
-        project_id,
-        model_id,
-        specified_class: Optional[str] = None,
-        selected_feature: Optional[str] = None,
-        exclude_stop_words: bool = False,
-        top_values: Optional[int] = None,
+    project_id,
+    model_id,
+    specified_class: Optional[str] = None,
+    selected_feature: Optional[str] = None,
+    exclude_stop_words: bool = False,
+    top_values: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
 
@@ -54,14 +54,12 @@ def wordcloud_chart(
     if top_values:
         word_cloud_object = WordCloud(word_cloud_object.most_important(top_values))
 
-    # Choose a weight attribute for the word cloud, e.g., frequency or count
     word_frequencies = {item["ngram"]: item["frequency"] for item in word_cloud_object.ngrams if
                         not item["is_stopword"]}
 
     cloud = wordcloud.WordCloud(background_color='#0e1117', width=1600, height=800,
                                 random_state=42).generate_from_frequencies(word_frequencies)
 
-    # Display the word cloud
     fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
     ax.imshow(cloud, interpolation='bilinear')
     ax.axis('off')
