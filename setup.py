@@ -39,6 +39,7 @@ setup(
     name=NAME,
     description='CLI client for custom application in Data Robot',
     long_description=open(path.join(path.dirname(__file__), 'README.md')).read(),
+    long_description_content_type='text/markdown',
     author='Data Robot',
     url='https://github.com/datarobot/{}'.format(REPO_NAME),
     packages=find_packages(exclude=['examples']),
