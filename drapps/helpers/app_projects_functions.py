@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import BinaryIO, List, Tuple, Union
 
 from click import UsageError
+from pathspec import pathspec
 
 ENTRYPOINT_SCRIPT_NAME = 'start-app.sh'
 
@@ -41,16 +42,28 @@ def check_project(file_folder: Path):
             )
 
 
+def load_ignore_patterns(file_folder: Path) -> pathspec.PathSpec:
+    ignore_file = Path(file_folder) / '.dr_apps_ignore'
+    if not ignore_file.exists():
+        return pathspec.PathSpec.from_lines("gitwildmatch", [])
+    with ignore_file.open("r") as f:
+        return pathspec.PathSpec.from_lines("gitwildmatch", f)
+
+
 def get_project_files_list(file_folder: Path) -> List[Tuple[Path, str]]:
     """Get list of absolute and relative paths for each file in project folder."""
-    files_in_folder = [file for file in file_folder.rglob("*") if file.is_file()]
+    spec = load_ignore_patterns(file_folder)
     result = []
-    for file in files_in_folder:
+    for file in file_folder.rglob("*"):
+        if not file.is_file():
+            continue
         relative_path = str(file.relative_to(file_folder))
         if os.path.sep == '\\':
             # if we work on Windows, convert relative path to UNIX way
             relative_path = relative_path.replace('\\', '/')
 
+        if spec.match_file(relative_path):
+            continue
         result.append((file, relative_path))
     return result
 
