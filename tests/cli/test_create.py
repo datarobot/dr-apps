@@ -402,7 +402,7 @@ def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
     Tests a simple drapps ignore file, which filters out .gitignore. This specifically verifies:
     1. A single directory, such as `.gitignore`
     2. A single file, in this case '.env'
-    3.
+    3. All .md file types
     """
     app_name = 'new_app'
     project_folder = "my_awesome_project"
