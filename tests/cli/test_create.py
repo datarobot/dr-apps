@@ -14,10 +14,11 @@ import pytest
 import responses
 from bson import ObjectId
 from click.testing import CliRunner
+from requests_toolbelt.multipart import decoder
 from responses import matchers
 
 from drapps.create import create
-from requests_toolbelt.multipart import decoder
+
 
 @responses.activate
 @pytest.mark.parametrize('wait_till_ready', (False, True))
@@ -478,13 +479,15 @@ def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
         with Path(project_folder, 'docs', 'readme.md').open('w') as source_file:
             source_file.write("hey")
         with Path(project_folder, '.dr_apps_ignore/').open('w') as gitignorefile:
-            gitignorefile.write("""
+            gitignorefile.write(
+                """
             .git/
             .env
             *.md
-            # We can also comment out stuff! How neat! app.py is still uploaded because we commented out the note 
+            # We can also comment out stuff! How neat! app.py is still uploaded because we commented out the note
             # app.py
-            """)
+            """
+            )
 
         cli_parameters = [
             '--base-env',
@@ -493,7 +496,7 @@ def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
             project_folder,
             '--skip-wait',
             app_name,
-            ]
+        ]
         result = runner.invoke(create, cli_parameters)
         logger = logging.getLogger()
         if result.exit_code:
@@ -502,7 +505,18 @@ def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
             logger.info(result.output)
         assert result.exit_code == 0, result.exception
 
-    calls = (call for call in responses.calls if (call.request.method == 'PATCH' and call.request.url == f"{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/"))
+    calls = (
+        call
+        for call in responses.calls
+        # black and flake8 are fighting again :(
+        # fmt: off
+        if (
+            call.request.method == 'PATCH'
+            and  # noqa: W504, W503
+            call.request.url == f"{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/"
+        )
+        # fmt: on
+    )
     files_uploaded = []
     for call in calls:
         content_type = call.request.headers["Content-Type"]
@@ -511,6 +525,7 @@ def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
             if b'name="filePath"' in part.headers[b'Content-Disposition']:
                 files_uploaded.append(part.content.decode())
 
+    assert files_uploaded
     # Verify we did not hide our python
     assert 'app.py' in files_uploaded, files_uploaded
     assert 'start-app.sh' in files_uploaded, files_uploaded

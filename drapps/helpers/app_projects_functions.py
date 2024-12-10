@@ -49,6 +49,7 @@ def load_ignore_patterns(file_folder: Path) -> pathspec.PathSpec:
     with ignore_file.open("r") as f:
         return pathspec.PathSpec.from_lines("gitwildmatch", f)
 
+
 def get_project_files_list(file_folder: Path) -> List[Tuple[Path, str]]:
     """Get list of absolute and relative paths for each file in project folder."""
     spec = load_ignore_patterns(file_folder)
