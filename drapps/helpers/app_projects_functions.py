@@ -45,7 +45,7 @@ def check_project(file_folder: Path):
 def load_ignore_patterns(file_folder: Path) -> pathspec.PathSpec:
     ignore_file = Path(file_folder) / '.dr_apps_ignore'
     if not ignore_file.exists():
-        return pathspec.PathSpec.from_lines("gitwildmatch", '')
+        return pathspec.PathSpec.from_lines("gitwildmatch", [])
     with ignore_file.open("r") as f:
         return pathspec.PathSpec.from_lines("gitwildmatch", f)
 
