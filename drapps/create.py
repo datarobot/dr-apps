@@ -451,6 +451,9 @@ def create(
 
     If application created from project folder, custom application image will be created
     or existing will be updated.
+
+    If you add a `.dr_apps_ignore` file, then that will use .gitignore syntax to selectively
+    ignore files you don't want to upload.
     """
     validate_parameters(base_env, path, image, stringenvvar, numericenvvar)
     if path:
