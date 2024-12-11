@@ -8,6 +8,7 @@
 
 import pytest
 from bson import ObjectId
+from responses import matchers
 
 
 @pytest.fixture
@@ -74,3 +75,8 @@ def metadata_yaml_content():
 def entrypoint_script_content():
     content = '#!/usr/bin/env bash\n' 'echo "We doing here something"'
     return content
+
+
+@pytest.fixture
+def auth_matcher(api_token_env):
+    return matchers.header_matcher({'Authorization': f'Bearer {api_token_env}'})

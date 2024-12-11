@@ -6,6 +6,7 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import json
+import logging
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,6 +14,7 @@ import pytest
 import responses
 from bson import ObjectId
 from click.testing import CliRunner
+from requests_toolbelt.multipart import decoder
 from responses import matchers
 
 from drapps.create import create
@@ -391,3 +393,145 @@ def test_create_with_name_in_use(api_endpoint_env):
 
     assert result.exit_code == 2, result.exception
     assert f'Name {app_name} is used by other custom application' in result.output
+
+
+@responses.activate
+@pytest.mark.usefixtures('api_token_env')
+def test_create_app_with_drappsignore(api_endpoint_env, ee_id, auth_matcher):
+    """
+    Tests a simple drapps ignore file, which filters out .gitignore. This specifically verifies:
+    1. A single directory, such as `.gitignore`
+    2. A single file, in this case '.env'
+    3. All .md file types
+    """
+    app_name = 'new_app'
+    project_folder = "my_awesome_project"
+
+    name_matcher = matchers.query_param_matcher({'name': app_name})
+    responses.get(
+        f'{api_endpoint_env}/customApplications/nameCheck/',
+        json={'inUse': False},
+        match=[name_matcher],
+    )
+
+    ee_data = {'id': ee_id, 'name': "Test ExecEnv", 'latestVersion': {'id': ee_id}}
+    responses.get(
+        f'{api_endpoint_env}/executionEnvironments/{ee_id}/', json=ee_data, match=[auth_matcher]
+    )
+    responses.get(
+        f'{api_endpoint_env}/customApplicationSources/', json={'data': []}, match=[auth_matcher]
+    )
+    # request for creating new application source
+    custom_app_source_id = str(ObjectId())
+    source_data_matcher = matchers.json_params_matcher({'name': f'{app_name}Source'})
+    responses.post(
+        f'{api_endpoint_env}/customApplicationSources/',
+        json={'id': custom_app_source_id},
+        match=[auth_matcher, source_data_matcher],
+    )
+    # request for creating new application source version
+    custom_app_source_version_id = str(ObjectId())
+    source_version_data_matcher = matchers.json_params_matcher({'label': 'v1'})
+    responses.post(
+        f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/',
+        json={'id': custom_app_source_version_id},
+        match=[auth_matcher, source_version_data_matcher],
+    )
+
+    responses.patch(
+        f'{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/',
+    )
+
+    # request for creating custom app
+    status_check_url = 'http://ho.st/status/status_id'
+    app_data_matcher = matchers.json_params_matcher(
+        {'name': app_name, 'applicationSourceId': custom_app_source_id}
+    )
+    custom_app_response = {
+        'id': str(ObjectId()),
+        'applicationUrl': 'http://ho.st/custom_applications/65980d79eea4fd0eddd59bba/',
+    }
+    responses.post(
+        f'{api_endpoint_env}/customApplications/',
+        headers={'Location': status_check_url},
+        json=custom_app_response,
+        match=[auth_matcher, app_data_matcher],
+    )
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        Path(project_folder).mkdir()
+        with Path(project_folder, 'start-app.sh').open('wb') as script_file:
+            script_file.write(b'#!/usr/bin/env bash run app')
+        with Path(project_folder, 'app.py').open('wb') as meta_file:
+            meta_file.write(b'hello world')
+        Path(project_folder, '.git').mkdir()
+        Path(project_folder, '.git', 'foo').mkdir()
+        Path(project_folder, '.git', 'bar').mkdir()
+        with Path(f'{project_folder}/.git/foo', 'randomjunk1').open('wb') as gitignorefile:
+            gitignorefile.write(b'Random Junk')
+        with Path(f'{project_folder}/.git/foo', 'randomjunk2').open('wb') as gitignorefile:
+            gitignorefile.write(b'Random Junk2')
+        with Path(f'{project_folder}/.git/bar', 'randomjunk3').open('wb') as gitignorefile:
+            gitignorefile.write(b'Random Junk3')
+        with Path(project_folder, '.env').open('w') as dot_env_file:
+            dot_env_file.write("MY_SECRET=TOP_SNEAKY")
+        Path(project_folder, 'docs').mkdir()
+        with Path(project_folder, 'docs', 'readme.md').open('w') as source_file:
+            source_file.write("hey")
+        with Path(project_folder, '.dr_apps_ignore/').open('w') as gitignorefile:
+            gitignorefile.write(
+                """
+            .git/
+            .env
+            *.md
+            # We can also comment out stuff! How neat! app.py is still uploaded because we commented out the note
+            # app.py
+            """
+            )
+
+        cli_parameters = [
+            '--base-env',
+            ee_id,
+            '--path',
+            project_folder,
+            '--skip-wait',
+            app_name,
+        ]
+        result = runner.invoke(create, cli_parameters)
+        logger = logging.getLogger()
+        if result.exit_code:
+            logger.error(result.output)
+        else:
+            logger.info(result.output)
+        assert result.exit_code == 0, result.exception
+
+    calls = (
+        call
+        for call in responses.calls
+        # black and flake8 are fighting again :(
+        # fmt: off
+        if (
+            call.request.method == 'PATCH'
+            and  # noqa: W504, W503
+            call.request.url == f"{api_endpoint_env}/customApplicationSources/{custom_app_source_id}/versions/{custom_app_source_version_id}/"
+        )
+        # fmt: on
+    )
+    files_uploaded = []
+    for call in calls:
+        content_type = call.request.headers["Content-Type"]
+        multipart_data = decoder.MultipartDecoder(call.request.body, content_type)
+        for part in multipart_data.parts:
+            if b'name="filePath"' in part.headers[b'Content-Disposition']:
+                files_uploaded.append(part.content.decode())
+
+    assert files_uploaded
+    # Verify we did not hide our python
+    assert 'app.py' in files_uploaded, files_uploaded
+    assert 'start-app.sh' in files_uploaded, files_uploaded
+    # Verify we can filter out folders
+    assert not any(file_uploaded.startswith('.git') for file_uploaded in files_uploaded)
+    # Verify we can filter out a single file
+    assert '.env' not in files_uploaded, files_uploaded
+    # verify we can filter out files by extension
+    assert not any(file_uploaded.endswith('.md') for file_uploaded in files_uploaded)
