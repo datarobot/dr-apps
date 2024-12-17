@@ -23,8 +23,7 @@ from .helpers.custom_app_sources_functions import (
     get_custom_app_source_by_name,
     get_custom_app_source_versions_list,
     update_application_source_version,
-    update_cpu_size,
-    update_num_replicas,
+    update_resources,
     update_runtime_params,
 )
 from .helpers.custom_apps_functions import (
@@ -177,6 +176,7 @@ def configure_custom_app_source_version(
     runtime_params: List[Dict],
     replicas: int,
     cpu_size: str,
+    use_session_affinity: bool,
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
@@ -209,19 +209,14 @@ def configure_custom_app_source_version(
 
             payload = {}
             progress.update(len(file_chunk))
-        update_num_replicas(
+        update_resources(
             session=session,
             endpoint=endpoint,
             source_id=custom_app_source_id,
             version_id=custom_app_source_version_id,
             replicas=replicas,
-        )
-        update_cpu_size(
-            session=session,
-            endpoint=endpoint,
-            source_id=custom_app_source_id,
-            version_id=custom_app_source_version_id,
             cpu_size=cpu_size,
+            session_affinity=use_session_affinity,
         )
         # Finally, add runtime params
         update_runtime_params(
@@ -242,6 +237,7 @@ def create_app_from_project(
     runtime_params: List[Dict],
     replicas: int,
     cpu_size: str,
+    use_session_affinity: bool,
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
@@ -258,6 +254,7 @@ def create_app_from_project(
         runtime_params=runtime_params,
         replicas=replicas,
         cpu_size=cpu_size,
+        use_session_affinity=use_session_affinity,
     )
     app_payload = {'name': app_name, 'applicationSourceId': custom_app_source_id}
     click.echo(f'Starting {app_name} custom application.')
@@ -432,6 +429,12 @@ def parse_env_vars(ctx, param, value):
     callback=parse_env_vars,
     help='Numeric environment variable in the format KEY=VALUE',
 )
+@click.option(
+    '--use-session-affinity',
+    is_flag=True,
+    default=False,
+    help='Controls whether you want requests to go to the same instance when you have multiple replicas. This can be useful for the streamlit file upload widget, which can raise 401 errors without session stickiness or if you need to store persistent information in local memory/files.',
+)
 @click.argument('application_name', type=click.STRING, required=True)
 def create(
     token: str,
@@ -445,6 +448,7 @@ def create(
     application_name: str,
     replicas: int,
     cpu_size: str,
+    use_session_affinity: bool,
 ) -> None:
     """
     Creates new custom application from docker image or base environment.
@@ -482,6 +486,7 @@ def create(
             runtime_params=runtime_params,
             replicas=replicas,
             cpu_size=cpu_size,
+            use_session_affinity=use_session_affinity,
         )
 
     if skip_wait or not app_data.get('statusUrl'):

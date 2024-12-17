@@ -121,6 +121,9 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
 @responses.activate
 @pytest.mark.parametrize('use_environment_id', (False, True))
 @pytest.mark.parametrize('wait_till_ready', (False, True))
+@pytest.mark.parametrize('use_session_affinity', (False, True))
+@pytest.mark.parametrize('n_instances', (2, None))  # None == unset
+@pytest.mark.parametrize('desired_cpu_size', ('2xsmall', None))
 def test_create_from_project(
     api_endpoint_env,
     api_token_env,
@@ -132,20 +135,21 @@ def test_create_from_project(
     entrypoint_script_content,
     use_environment_id,
     wait_till_ready,
+    use_session_affinity,
+    n_instances,
+    desired_cpu_size,
 ):
     """
     Sort-of a mega test for the create app + src from a code-based project (non docker image). This tests:
     1. Creating the source + app
     2. Runtime params that are strings / numeric
     3. The number of instances is passed
-    4. The tee-shirt size is passed (requires MLOPS_RESOURCE_REQUEST_BUNDLES feature flag)
+    4. The tee-shirt size is passed
     Note:
         The responses API is not great at handling cases where we call an API multiple times with multiple different
         parameters, like we do with the /customApplicationSources/<app-src-id>/versions/<version-id>/.
         So rather than use a form-data matcher, it makes more sense to just check it after the test run.
     """
-    n_instances = 2
-    desired_cpu_size = '2xsmall'
     app_name = 'new_app'
     project_folder = 'project-folder'
     ee_name = 'ExecutionEnv'
@@ -253,11 +257,18 @@ def test_create_from_project(
         'INT_VAL=3',
         '--numericEnvVar',
         'FLOAT_VAL=3.14',
-        '--replicas',
-        str(n_instances),
         '--cpu-size',
         desired_cpu_size,
     ]
+    if use_session_affinity:
+        cli_parameters.append('--use-session-affinity')
+    if n_instances:
+        cli_parameters.append('--replicas')
+        cli_parameters.append(str(n_instances))
+    if desired_cpu_size:
+        cli_parameters.append('--cpu-size')
+        cli_parameters.append(desired_cpu_size)
+
     if not wait_till_ready:
         cli_parameters.append('--skip-wait')
 
@@ -298,28 +309,29 @@ def test_create_from_project(
             assert float(param['value']) == float(numeric_env_vars[param['fieldName']])
         else:
             pytest.fail(f"Unexpected environment variable: {param['fieldName']}")
-
     # Assertions to verify instances were properly specified
-    env_var_requests = [
+    resource_request = [
         call
         for call in responses.calls
         if call.request.url.endswith(f'/versions/{custom_app_source_version_id}/')
         and call.request.method == 'PATCH'  # noqa: W503
-        and 'replicas' in call.request.body.decode('utf-8')  # noqa: W503
+        and '"resources"' in call.request.body.decode('utf-8')  # noqa: W503
     ]
-    assert len(env_var_requests) == 1
-    assert f'{{"replicas":{n_instances}}}'.encode() in env_var_requests[0].request.body
-    # Assertions to make sure tee shirt CPU size is applied
-    cpu_sz_requests = [
-        call
-        for call in responses.calls
-        if call.request.url.endswith(f'/versions/{custom_app_source_version_id}/')
-        and call.request.method == 'PATCH'  # noqa: W503
-        and 'resourceLabel' in call.request.body.decode('utf-8')  # noqa: W503
-    ]
-    assert len(cpu_sz_requests) == 1
-    # NOTE: We have to map 2xsmall -> nano
-    assert '{"resourceLabel":"cpu.nano"}'.encode() in cpu_sz_requests[0].request.body
+    assert len(resource_request) == 1
+
+    content_type = resource_request[0].request.headers["Content-Type"]
+    sent_payload = json.loads(
+        next(
+            part
+            for part in decoder.MultipartDecoder(
+                resource_request[0].request.body, content_type
+            ).parts
+            if b'name="resources' in part.headers[b'Content-Disposition']
+        ).text
+    )
+    assert sent_payload.get('replicas') == n_instances or 1
+    assert sent_payload.get("resourceLabel") == "cpu.nano" or 'cpu.small'
+    assert sent_payload.get("sessionAffinity") == use_session_affinity
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
