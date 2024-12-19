@@ -5,8 +5,9 @@
 #  This is proprietary source code of DataRobot, Inc. and its affiliates.
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
+import json
 import posixpath
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from requests import Session
 
@@ -96,32 +97,30 @@ def update_runtime_params(
         handle_dr_response(response)
 
 
-def update_num_replicas(
+def update_resources(
     session: Session,
     endpoint: str,
     source_id: str,
     version_id: str,
-    replicas: int,
+    replicas: Optional[int] = None,
+    cpu_size: Optional[str] = None,
+    session_affinity: Optional[bool] = None,
 ):
+    resources = dict()
+    if replicas is not None:
+        resources["replicas"] = replicas
+    if cpu_size is not None:
+        if cpu_size == '2xsmall':
+            cpu_size = 'nano'
+        elif cpu_size == 'xsmall':
+            cpu_size = 'micro'
+        resources["resourceLabel"] = f'cpu.{cpu_size}'  # type: ignore
+    if session_affinity is not None:
+        resources["sessionAffinity"] = session_affinity
+    if not resources:
+        return
     url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
-    form_data = {"resources": (None, f'{{"replicas":{replicas}}}', 'application/json')}
-    rsp = session.patch(url, files=form_data)
-    handle_dr_response(rsp)
-
-
-def update_cpu_size(
-    session: Session,
-    endpoint: str,
-    source_id: str,
-    version_id: str,
-    cpu_size: str,
-):
-    if cpu_size == '2xsmall':
-        cpu_size = 'nano'
-    elif cpu_size == 'xsmall':
-        cpu_size = 'micro'
-    url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
-    form_data = {"resources": (None, f'{{"resourceLabel":"cpu.{cpu_size}"}}', 'application/json')}
+    form_data = {"resources": (None, json.dumps(resources), 'application/json')}
     rsp = session.patch(url, files=form_data)
     handle_dr_response(rsp)
 
