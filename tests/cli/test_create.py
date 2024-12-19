@@ -124,6 +124,7 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
 @pytest.mark.parametrize('use_session_affinity', (False, True))
 @pytest.mark.parametrize('n_instances', (2, None))  # None == unset
 @pytest.mark.parametrize('desired_cpu_size', ('2xsmall', None))
+@pytest.mark.parametrize('run_on_root', (True, False))
 def test_create_from_project(
     api_endpoint_env,
     api_token_env,
@@ -138,6 +139,7 @@ def test_create_from_project(
     use_session_affinity,
     n_instances,
     desired_cpu_size,
+    run_on_root,
 ):
     """
     Sort-of a mega test for the create app + src from a code-based project (non docker image). This tests:
@@ -268,6 +270,8 @@ def test_create_from_project(
     if desired_cpu_size:
         cli_parameters.append('--cpu-size')
         cli_parameters.append(desired_cpu_size)
+    if run_on_root:
+        cli_parameters.append('--service-requests-on-root-path')
 
     if not wait_till_ready:
         cli_parameters.append('--skip-wait')
@@ -332,6 +336,7 @@ def test_create_from_project(
     assert sent_payload.get('replicas') == n_instances or 1
     assert sent_payload.get("resourceLabel") == "cpu.nano" or 'cpu.small'
     assert sent_payload.get("sessionAffinity") == use_session_affinity
+    assert sent_payload.get("serviceWebRequestsOnRootPath") == run_on_root
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
