@@ -102,6 +102,7 @@ def update_resources(
     endpoint: str,
     source_id: str,
     version_id: str,
+    service_requests_on_root_path: bool,
     replicas: Optional[int] = None,
     cpu_size: Optional[str] = None,
     session_affinity: Optional[bool] = None,
@@ -117,8 +118,7 @@ def update_resources(
         resources["resourceLabel"] = f'cpu.{cpu_size}'  # type: ignore
     if session_affinity is not None:
         resources["sessionAffinity"] = session_affinity
-    if not resources:
-        return
+    resources["serviceWebRequestsOnRootPath"] = service_requests_on_root_path
     url = posixpath.join(endpoint, f"customApplicationSources/{source_id}/versions/{version_id}/")
     form_data = {"resources": (None, json.dumps(resources), 'application/json')}
     rsp = session.patch(url, files=form_data)
