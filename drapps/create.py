@@ -276,7 +276,9 @@ def wait_for_execution_environment_version_ready(
             progress.update(1)
             sleep(CHECK_STATUS_WAIT_TIME)
         else:
-            raise RuntimeError(f'Image build failed with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds')
+            raise RuntimeError(
+                f'Image build failed with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds'
+            )
     if img_status in IMAGE_BUILD_FAILED_STATUSES:
         raise Exception("Image build failed")
 
