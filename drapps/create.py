@@ -264,8 +264,9 @@ def create_app_from_project(
 def wait_for_execution_environment_version_ready(
     session: Session, endpoint: str, base_env_id: str, version_id: str
 ) -> None:
+    runs = 500
     with click.progressbar(iterable=repeat(0), label='Waiting till image is ready:') as progress:
-        while True:
+        for i in range(runs):
             response = get_execution_environment_version_by_id(
                 session=session, endpoint=endpoint, base_env_id=base_env_id, version_id=version_id
             )
@@ -274,6 +275,10 @@ def wait_for_execution_environment_version_ready(
                 break
             progress.update(1)
             sleep(CHECK_STATUS_WAIT_TIME)
+        else:
+            raise RuntimeError(
+                f'Image build failed with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds'
+            )
     if img_status in IMAGE_BUILD_FAILED_STATUSES:
         raise Exception("Image build failed")
 
