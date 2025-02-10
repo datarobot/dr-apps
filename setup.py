@@ -14,6 +14,7 @@ install_requires = [
     'requests-toolbelt==1.0.0',
     'tabulate==0.9.0',
     'pathspec==0.12.1',
+    'PyYAML==6.0.2'
 ]
 
 tests_require = [
