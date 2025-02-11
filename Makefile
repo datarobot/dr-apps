@@ -9,6 +9,10 @@ req-test:
 	pip install --upgrade pip==20.3.4
 	pip install -e .[test]
 
+req:
+	pip install --upgrade pip==20.3.4
+	pip install .
+
 test:
 	py.test -sv tests/ --log-cli-level=DEBUG
 	py.test -sv examples/prediction-demo/tests/ --log-cli-level=DEBUG

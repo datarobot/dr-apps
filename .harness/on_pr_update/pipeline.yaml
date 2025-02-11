@@ -72,6 +72,39 @@ pipeline:
                           limits:
                             memory: 2Gi
                             cpu: "1"
+        - stage:
+            name: Test Base Environment
+            identifier: test_base_env
+            description: "Makes sure the dependencies that are specified in the base are enough to run the app"
+            type: CI
+            spec:
+              cloneCodebase: true
+              infrastructure:
+                type: KubernetesDirect
+                spec:
+                  connectorRef: account.cigeneral
+                  namespace: harness-delegate-ng
+                  automountServiceAccountToken: true
+                  nodeSelector: {}
+                  os: Linux
+              execution:
+                steps:
+                  - step:
+                      type: Run
+                      name: Run Unit Tests
+                      identifier: Tests
+                      spec:
+                        connectorRef: account.dockerhub_datarobot_read
+                        image: python:3.9
+                        shell: Sh
+                        command: |-
+                          set -x
+                          make req
+                          drapps
+                        resources:
+                          limits:
+                            memory: 2Gi
+                            cpu: "1"
   properties:
     ci:
       codebase:
