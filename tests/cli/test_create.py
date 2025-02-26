@@ -121,10 +121,10 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
 @responses.activate
 @pytest.mark.parametrize('use_environment_id', (False, True))
 @pytest.mark.parametrize('wait_till_ready', (False, True))
-@pytest.mark.parametrize('use_session_affinity', (False, True, None))
+@pytest.mark.parametrize('use_session_affinity', (True, None))
 @pytest.mark.parametrize('n_instances', (2, None))  # None == unset
 @pytest.mark.parametrize('desired_cpu_size', ('2xsmall', None))
-@pytest.mark.parametrize('run_on_root', (True, False, None))
+@pytest.mark.parametrize('run_on_root', (True, None))
 def test_create_from_project(
     api_endpoint_env,
     api_token_env,
@@ -262,7 +262,7 @@ def test_create_from_project(
         '--cpu-size',
         desired_cpu_size,
     ]
-    if use_session_affinity is not None:
+    if use_session_affinity:
         cli_parameters.append('--use-session-affinity')
     if n_instances:
         cli_parameters.append('--replicas')
@@ -270,7 +270,7 @@ def test_create_from_project(
     if desired_cpu_size:
         cli_parameters.append('--cpu-size')
         cli_parameters.append(desired_cpu_size)
-    if run_on_root is not None :
+    if run_on_root:
         cli_parameters.append('--service-requests-on-root-path')
 
     if not wait_till_ready:
