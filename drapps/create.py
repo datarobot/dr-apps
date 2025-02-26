@@ -441,13 +441,13 @@ def parse_env_vars(ctx, param, value):
 @click.option(
     '--use-session-affinity',
     is_flag=True,
-    default=False,
+    default=None,
     help='Controls whether you want requests to go to the same instance when you have multiple replicas. This can be useful for the streamlit file upload widget, which can raise 401 errors without session stickiness or if you need to store persistent information in local memory/files.',
 )
 @click.option(
     '--service-requests-on-root-path',
     is_flag=True,
-    default=False,
+    default=None,
     help='If this flag is set then your app will service web requests + internal health checks on `/`, rather than servicing web requests on `/apps/id/ and health checks on `/apps/id`.',
 )
 @click.argument('application_name', type=click.STRING, required=True)
