@@ -176,8 +176,8 @@ def configure_custom_app_source_version(
     runtime_params: List[Dict],
     replicas: int,
     cpu_size: str,
-    use_session_affinity: bool,
-    service_requests_on_root_path: bool,
+    use_session_affinity: Optional[bool],
+    service_requests_on_root_path: Optional[bool],
 ) -> None:
     payload: Dict[str, Any] = {'baseEnvironmentVersionId': base_env_version_id}
     project_files = get_project_files_list(project)
@@ -239,8 +239,8 @@ def create_app_from_project(
     runtime_params: List[Dict],
     replicas: int,
     cpu_size: str,
-    use_session_affinity: bool,
-    service_requests_on_root_path: bool,
+    use_session_affinity: Optional[bool],
+    service_requests_on_root_path: Optional[bool],
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
@@ -441,13 +441,13 @@ def parse_env_vars(ctx, param, value):
 @click.option(
     '--use-session-affinity',
     is_flag=True,
-    default=False,
+    default=None,
     help='Controls whether you want requests to go to the same instance when you have multiple replicas. This can be useful for the streamlit file upload widget, which can raise 401 errors without session stickiness or if you need to store persistent information in local memory/files.',
 )
 @click.option(
     '--service-requests-on-root-path',
     is_flag=True,
-    default=False,
+    default=None,
     help='If this flag is set then your app will service web requests + internal health checks on `/`, rather than servicing web requests on `/apps/id/ and health checks on `/apps/id`.',
 )
 @click.argument('application_name', type=click.STRING, required=True)
@@ -463,8 +463,8 @@ def create(
     application_name: str,
     replicas: int,
     cpu_size: str,
-    use_session_affinity: bool,
-    service_requests_on_root_path: bool,
+    use_session_affinity: Optional[bool],
+    service_requests_on_root_path: Optional[bool],
 ) -> None:
     """
     Creates new custom application from docker image or base environment.

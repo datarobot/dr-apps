@@ -121,10 +121,10 @@ def test_create_from_docker_image(api_endpoint_env, api_token_env, wait_till_rea
 @responses.activate
 @pytest.mark.parametrize('use_environment_id', (False, True))
 @pytest.mark.parametrize('wait_till_ready', (False, True))
-@pytest.mark.parametrize('use_session_affinity', (False, True))
+@pytest.mark.parametrize('use_session_affinity', (True, None))
 @pytest.mark.parametrize('n_instances', (2, None))  # None == unset
 @pytest.mark.parametrize('desired_cpu_size', ('2xsmall', None))
-@pytest.mark.parametrize('run_on_root', (True, False))
+@pytest.mark.parametrize('run_on_root', (True, None))
 def test_create_from_project(
     api_endpoint_env,
     api_token_env,
@@ -335,8 +335,14 @@ def test_create_from_project(
     )
     assert sent_payload.get('replicas') == n_instances or 1
     assert sent_payload.get("resourceLabel") == "cpu.nano" or 'cpu.small'
-    assert sent_payload.get("sessionAffinity") == use_session_affinity
-    assert sent_payload.get("serviceWebRequestsOnRootPath") == run_on_root
+    if use_session_affinity is not None:
+        assert sent_payload.get("sessionAffinity") == use_session_affinity
+    else:
+        assert 'sessionAffinity' not in sent_payload
+    if run_on_root is not None:
+        assert sent_payload.get("serviceWebRequestsOnRootPath") == run_on_root
+    else:
+        assert 'serviceWebRequestsOnRootPath' not in sent_payload
 
 
 @pytest.mark.usefixtures('api_endpoint_env', 'api_token_env')
