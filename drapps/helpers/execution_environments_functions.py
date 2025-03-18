@@ -6,6 +6,7 @@
 #  Released under the terms of DataRobot Tool and Utility Agreement.
 #
 import posixpath
+from collections import namedtuple
 from typing import Any, Dict, List, Optional, Union
 
 from requests import Session
@@ -98,3 +99,18 @@ def get_execution_environment_version_by_id(
     response = session.get(url)
     handle_dr_response(response)
     return response.json()
+
+
+BuildLog = namedtuple('BuildLog', ['error', 'log'])
+
+
+def get_execution_environment_version_buildlog(
+    session: Session, endpoint, base_env_id: str, version_id: str
+) -> BuildLog:
+    url = posixpath.join(
+        endpoint, f"executionEnvironments/{base_env_id}/versions/{version_id}/buildLog/"
+    )
+    response = session.get(url)
+    handle_dr_response(response)
+    rsp_json = response.json()
+    return BuildLog(rsp_json['error'], rsp_json['log'])
