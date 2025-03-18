@@ -18,11 +18,12 @@ from drapps.env import create_env
 
 
 @responses.activate
+@pytest.mark.parametrize('build_status', ['success', 'failed'])
 @pytest.mark.parametrize('image_name', ['dockerfile.tgz'])
 @pytest.mark.parametrize('env_name', ["My New Execution Env"])
 @pytest.mark.parametrize('description', ["This is an Exec Env", None])
 def test_create_env_with_version(
-    api_endpoint_env, api_token_env, image_name, description, env_name
+    api_endpoint_env, api_token_env, image_name, description, env_name, build_status
 ):
     execution_environments_id = ObjectId()
     auth_matcher = matchers.header_matcher(
@@ -52,9 +53,13 @@ def test_create_env_with_version(
 
     exec_env_version_status_url = f'{api_endpoint_env}/executionEnvironments/{execution_environments_id}/versions/{version_id}/'
     exec_env_version_rsp = {
-        "buildStatus": "success",
+        "buildStatus": build_status,
     }
     responses.get(exec_env_version_status_url, json=exec_env_version_rsp, match=[auth_matcher])
+
+    exec_env_logs_url = f'{api_endpoint_env}/executionEnvironments/{execution_environments_id}/versions/{version_id}/buildLog/'
+    exec_env_logs_rsp = {"error": "A terrible error happened", "log": "#1 we built the app..."}
+    responses.get(exec_env_logs_url, json=exec_env_logs_rsp, match=[auth_matcher])
 
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -66,8 +71,13 @@ def test_create_env_with_version(
                 create_env, ["--name", env_name, "-i", image_name, '-d', description]
             )
     logger = logging.getLogger()
-    if result.exit_code:
-        logger.error(result.output)
-    else:
-        logger.info(result.output)
-    assert result.exit_code == 0, result.exception
+    if build_status == "success":
+        if result.exit_code:
+            logger.error(result.output)
+        else:
+            logger.info(result.output)
+        assert result.exit_code == 0, result.exception
+    elif build_status == "failed":
+        assert exec_env_logs_rsp['error'] in result.exception.args[0]
+        assert exec_env_logs_rsp['log'] in result.exception.args[0]
+        assert result.exit_code != 0, result.exception

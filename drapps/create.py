@@ -42,6 +42,7 @@ from .helpers.execution_environments_functions import (
     create_execution_environment_version,
     get_execution_environment_by_id,
     get_execution_environment_by_name,
+    get_execution_environment_version_buildlog,
     get_execution_environment_version_by_id,
 )
 from .helpers.runtime_params_functions import verify_runtime_env_vars
@@ -280,11 +281,19 @@ def wait_for_execution_environment_version_ready(
             progress.update(1)
             sleep(CHECK_STATUS_WAIT_TIME)
         else:
+            build_log = get_execution_environment_version_buildlog(
+                session, endpoint, base_env_id, version_id
+            )
             raise RuntimeError(
-                f'Build for execution environment version with ID {version_id} timed out with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds.'
+                f'Build for execution environment version with ID {version_id} timed out with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds. \nThe error was: {build_log.error} \nThe build log: {build_log.log}'
             )
     if img_status in IMAGE_BUILD_FAILED_STATUSES:
-        raise Exception(f"Build for execution environment version with ID {version_id} failed.")
+        build_log = get_execution_environment_version_buildlog(
+            session, endpoint, base_env_id, version_id
+        )
+        raise Exception(
+            f"Build for execution environment version with ID {version_id} failed. \nThe error was: {build_log.error} \nThe build log: {build_log.log}"
+        )
 
 
 def send_docker_image_with_progress(
