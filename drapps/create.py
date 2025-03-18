@@ -240,8 +240,8 @@ def create_app_from_project(
     runtime_params: List[Dict],
     replicas: int,
     cpu_size: str,
-    use_session_affinity: Optional[bool],
-    service_requests_on_root_path: Optional[bool],
+    use_session_affinity: Optional[bool] = False,
+    service_requests_on_root_path: Optional[bool] = False ,
 ) -> Dict[str, Any]:
     base_env_version_id = get_base_env_version(session, endpoint, base_env)
     source_name = f'{app_name}Source'
