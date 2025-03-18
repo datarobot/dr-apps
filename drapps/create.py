@@ -281,10 +281,10 @@ def wait_for_execution_environment_version_ready(
             sleep(CHECK_STATUS_WAIT_TIME)
         else:
             raise RuntimeError(
-                f'Build for execution environment version failed with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds'
+                f'Build for execution environment version with ID {version_id} timed out with status {img_status} after {runs * CHECK_STATUS_WAIT_TIME} seconds.'
             )
     if img_status in IMAGE_BUILD_FAILED_STATUSES:
-        raise Exception(f"Build for execution environment version failed with status {img_status}")
+        raise Exception(f"Build for execution environment version with ID {version_id} failed.")
 
 
 def send_docker_image_with_progress(
