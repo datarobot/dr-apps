@@ -457,7 +457,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='Numeric environment variable in the format KEY=3 or KEY=3.12 for float value',
+    help='Numeric environment variable in the format KEY=3 or KEY=3.12 for float values',
 )
 @click.option(
     '--booleanEnvVar',
