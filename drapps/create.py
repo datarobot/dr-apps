@@ -58,6 +58,7 @@ def validate_parameters(
     image: Optional[Path],
     stringenvvar: Optional[Dict[str, str]],
     numericenvvar: Optional[Dict[str, str]],
+    booleanenvvar: Optional[Dict[str, str]],
 ) -> None:
     message = None
     if not (base_env or path or image):
@@ -75,7 +76,7 @@ def validate_parameters(
             'Execution environment (base-env) and project folder (path) are '
             'both required for creating custom application.'
         )
-    elif (stringenvvar or numericenvvar) and image:
+    elif (stringenvvar or numericenvvar or booleanenvvar) and image:
         message = 'Custom runtime params does not support direct image upload.'
 
     if message:
@@ -102,7 +103,9 @@ def get_base_env_version(session: Session, endpoint: str, base_env: str) -> str:
 
 
 def get_runtime_params(
-    string_env_var: Optional[Dict[str, str]], numeric_env_var: Optional[Dict[str, str]]
+    string_env_var: Optional[Dict[str, str]],
+    numeric_env_var: Optional[Dict[str, str]],
+    boolean_env_var: Optional[Dict[str, str]],
 ) -> List[Dict]:
     runtime_params = []
     if string_env_var:
@@ -121,6 +124,15 @@ def get_runtime_params(
                     'fieldName': key,
                     'value': value,
                     'type': 'numeric',
+                }
+            )
+    if boolean_env_var:
+        for key, value in boolean_env_var.items():
+            runtime_params.append(
+                {
+                    'fieldName': key,
+                    'value': value,
+                    'type': 'boolean',
                 }
             )
     return runtime_params
@@ -437,7 +449,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='String environment variable in the format KEY=VALUE',
+    help='String environment variable in the format KEY="Hello World"',
 )
 @click.option(
     '--numericEnvVar',
@@ -445,7 +457,15 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='Numeric environment variable in the format KEY=VALUE',
+    help='Numeric environment variable in the format KEY=3 or KEY=3.12 for float values',
+)
+@click.option(
+    '--booleanEnvVar',
+    multiple=True,
+    required=False,
+    type=click.STRING,
+    callback=parse_env_vars,
+    help='Boolean environment variable in the format KEY=True|False, KEY=true|false or KEY=1|0',
 )
 @click.option(
     '--use-session-affinity',
@@ -469,6 +489,7 @@ def create(
     skip_wait: bool,
     stringenvvar: Optional[Dict[str, str]],
     numericenvvar: Optional[Dict[str, str]],
+    booleanenvvar: Optional[Dict[str, str]],
     application_name: str,
     replicas: int,
     cpu_size: str,
@@ -484,14 +505,14 @@ def create(
     If you add a `.dr_apps_ignore` file, then that will use .gitignore syntax to selectively
     ignore files you don't want to upload.
     """
-    validate_parameters(base_env, path, image, stringenvvar, numericenvvar)
+    validate_parameters(base_env, path, image, stringenvvar, numericenvvar, booleanenvvar)
     if path:
         check_project(path)
 
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
 
-    runtime_params = get_runtime_params(stringenvvar, numericenvvar)
+    runtime_params = get_runtime_params(stringenvvar, numericenvvar, booleanenvvar)
 
     if is_app_name_in_use(session, endpoint, application_name):
         message = f'Name {application_name} is used by other custom application'

@@ -56,6 +56,11 @@ def numeric_env_vars():
 
 
 @pytest.fixture
+def boolean_env_vars():
+    return {'IS_TEST': True, 'IS_BAD': False}
+
+
+@pytest.fixture
 def metadata_yaml_content():
     return """
     name: runtime-params    # noqa: W291    
@@ -68,6 +73,10 @@ def metadata_yaml_content():
         type: numeric
       - fieldName: FLOAT_VAL
         type: numeric
+      - fieldName: IS_TEST
+        type: boolean
+      - fieldName: IS_BAD
+        type: boolean
     """
 
 

@@ -132,6 +132,7 @@ def test_create_from_project(
     ee_last_version_id,
     string_env_vars,
     numeric_env_vars,
+    boolean_env_vars,
     metadata_yaml_content,
     entrypoint_script_content,
     use_environment_id,
@@ -259,6 +260,10 @@ def test_create_from_project(
         'INT_VAL=3',
         '--numericEnvVar',
         'FLOAT_VAL=3.14',
+        '--booleanEnvVar',
+        'IS_TEST=True',
+        '--booleanEnvVar',
+        'IS_BAD=False',
         '--cpu-size',
         desired_cpu_size,
     ]
@@ -300,7 +305,9 @@ def test_create_from_project(
         and 'runtimeParameterValues' in call.request.body.decode('utf-8')  # noqa: W503
     ]
 
-    assert len(env_var_requests) == len(string_env_vars) + len(numeric_env_vars)
+    assert len(env_var_requests) == len(string_env_vars) + len(numeric_env_vars) + len(
+        boolean_env_vars
+    )
 
     for call in env_var_requests:
         body = json.loads(call.request.body.decode('utf-8'))
@@ -311,6 +318,9 @@ def test_create_from_project(
         elif param['fieldName'] in numeric_env_vars:
             assert param['type'] == 'numeric'
             assert float(param['value']) == float(numeric_env_vars[param['fieldName']])
+        elif param['fieldName'] in boolean_env_vars:
+            assert param['type'] == 'boolean'
+            assert bool(param['value']) == bool(boolean_env_vars[param['fieldName']])
         else:
             pytest.fail(f"Unexpected environment variable: {param['fieldName']}")
     # Assertions to verify instances were properly specified

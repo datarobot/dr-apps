@@ -30,6 +30,10 @@ def str_to_numeric(value):
             click.echo(f"{value} is not a numeric value", err=True)
 
 
+def str_to_bool(s):
+    return str(s).strip().lower() in ("true", "1")
+
+
 def verify_runtime_env_vars(metadata_file, runtime_env_vars) -> List[str]:
     """
     Verify that the runtime environment variables are valid.
@@ -54,6 +58,10 @@ def verify_runtime_env_vars(metadata_file, runtime_env_vars) -> List[str]:
                 elif param_type == "numeric":
                     param_value = param['value']
                     param['value'] = str_to_numeric(param_value)
+                    valid_params.append(f'[{json.dumps(param)}]')
+                elif param_type == "boolean":
+                    param_value = param['value']
+                    param['value'] = str_to_bool(param_value)
                     valid_params.append(f'[{json.dumps(param)}]')
             else:
                 print(
