@@ -449,7 +449,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='String environment variable in the format KEY=VALUE',
+    help='String environment variable in the format KEY="Hello World"',
 )
 @click.option(
     '--numericEnvVar',
@@ -457,7 +457,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='Numeric environment variable in the format KEY=VALUE',
+    help='Numeric environment variable in the format KEY=3 or KEY=3.12 for float value',
 )
 @click.option(
     '--booleanEnvVar',
@@ -465,7 +465,7 @@ def parse_env_vars(ctx, param, value):
     required=False,
     type=click.STRING,
     callback=parse_env_vars,
-    help='Boolean environment variable in the format KEY=VALUE',
+    help='Boolean environment variable in the format KEY=True|False, KEY=true|false or KEY=1|0',
 )
 @click.option(
     '--use-session-affinity',
