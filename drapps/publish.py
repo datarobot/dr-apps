@@ -60,7 +60,10 @@ def publish(
     source_application: Optional[str],
     skip_wait: bool,
 ) -> None:
-    """Updates the source version custom app"""
+    """Updates the source version of custom app and triggers the app to restart with
+    the new content of the source version such as code, base environment, runtime params, replicas, resources, etc
+    while keeping the application ID fixed.
+    """
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
     payload = {}
