@@ -60,9 +60,7 @@ def publish(
     source_application: Optional[str],
     skip_wait: bool,
 ) -> None:
-    """Updates a custom app, this covers the basic case of a new name
-    and also the custom apps publishing work which is scoped for 10.2
-    """
+    """Updates the source version custom app"""
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
     payload = {}
