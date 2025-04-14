@@ -60,8 +60,9 @@ def publish(
     source_application: Optional[str],
     skip_wait: bool,
 ) -> None:
-    """Updates a custom app, this covers the basic case of a new name
-    and also the custom apps publishing work which is scoped for 10.2
+    """Updates the source version of the custom app and triggers the app to restart with
+    the new content of the source version such as code, base environment, runtime params, replicas, resources, etc
+    while keeping the application ID fixed.
     """
     session = Session()
     session.headers.update({'Authorization': f'Bearer {token}'})
