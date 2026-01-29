@@ -61,6 +61,7 @@ def render_manifest(output_path, version):
         "name": PLUGIN_NAME,
         "version": version,
         "description": PLUGIN_DESCRIPTION,
+        "authentication": True,
         "minCLIVersion": MIN_CLI_VERSION,
         "scripts": {"posix": "dr-apps.sh", "windows": "dr-apps.ps1"},
     }
