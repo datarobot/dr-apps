@@ -9,6 +9,7 @@ REPO_NAME = 'dr-apps'
 install_requires = [
     'bson==0.5.10',
     'click==8.1.7',
+    'datarobot==3.5.2',
     'dateutils==0.6.12',
     'requests>=2.28,<2.29',
     'requests-toolbelt==1.0.0',
