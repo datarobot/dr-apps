@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+"""
+Build script for dr-apps CLI plugin.
+
+This script:
+1. Finds the built wheel package
+2. Extracts version from the wheel filename
+3. Generates the manifest.json with that version
+4. Templates the wrapper scripts to use the bundled wheel
+5. Prepares the plugin directory structure
+"""
+
+import json
+import os
+import re
+import shutil
+import sys
+from pathlib import Path
+
+import click
+
+# Constants
+PLUGIN_NAME = "apps"
+PLUGIN_DESCRIPTION = (
+    "Host custom applications in DataRobot using execution environments"
+)
+MIN_CLI_VERSION = "0.2.0"
+WHEEL_GLOB_PATTERN = "drapps-*.whl"
+DEFAULT_OUTPUT_DIR = "dist/plugin-staging"
+PLUGIN_DIR = "datarobot-cli-plugin"
+
+
+def find_wheel_and_version(dist_dir):
+    """Find the built wheel file and extract version from filename."""
+    wheels = list(Path(dist_dir).glob(WHEEL_GLOB_PATTERN))
+    if not wheels:
+        click.secho(f"Error: No wheel file found in {dist_dir}/", fg="red", err=True)
+        click.echo("Please run 'make clean && make cli-plugin' to build the wheel first.", err=True)
+        sys.exit(1)
+
+    if len(wheels) > 1:
+        click.secho(f"Warning: Multiple wheel files found in {dist_dir}/", fg="yellow", err=True)
+        click.echo(f"Using: {wheels[0].name}", err=True)
+
+    wheel_path = wheels[0]
+    wheel_name = wheel_path.name
+
+    # Extract version from wheel filename (e.g., drapps-11.1.1-py3-none-any.whl)
+    match = re.match(r'drapps-(.+?)(?:-py\d|\.whl)', wheel_name)
+    if not match:
+        click.secho(f"Error: Could not parse version from wheel filename: {wheel_name}", fg="red", err=True)
+        sys.exit(1)
+
+    version = match.group(1)
+    return wheel_path, wheel_name, version
+
+
+def render_manifest(output_path, version):
+    """Generate the manifest.json with the git version."""
+    manifest = {
+        "name": PLUGIN_NAME,
+        "version": version,
+        "description": PLUGIN_DESCRIPTION,
+        "authentication": True,
+        "minCLIVersion": MIN_CLI_VERSION,
+        "scripts": {"posix": "dr-apps.sh", "windows": "dr-apps.ps1"},
+    }
+
+    with open(output_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+        f.write("\n")
+
+
+def render_bash_script(template_path, output_path, version, wheel_name):
+    """Render the bash script from template file."""
+    with open(template_path, "r") as f:
+        template = f.read()
+
+    content = template.format(
+        plugin_name=PLUGIN_NAME,
+        version=version,
+        plugin_description=PLUGIN_DESCRIPTION,
+        wheel_name=wheel_name,
+    )
+
+    with open(output_path, "w") as f:
+        f.write(content)
+
+    # Make it executable
+    os.chmod(output_path, 0o755)
+
+
+def render_powershell_script(template_path, output_path, version, wheel_name):
+    """Render the PowerShell script from template file."""
+    with open(template_path, "r") as f:
+        template = f.read()
+
+    content = template.format(
+        plugin_name=PLUGIN_NAME,
+        version=version,
+        plugin_description=PLUGIN_DESCRIPTION,
+        wheel_name=wheel_name,
+    )
+
+    with open(output_path, "w") as f:
+        f.write(content)
+
+
+@click.command()
+@click.option(
+    "--output",
+    "-o",
+    default=DEFAULT_OUTPUT_DIR,
+    help="Output directory for the plugin",
+    type=click.Path(),
+)
+def main(output):
+    """Build dr-apps CLI plugin."""
+    # Get repository root (parent of bin directory)
+    repo_root = Path(__file__).parent.parent
+    os.chdir(repo_root)
+
+    # Find the wheel and extract version
+    dist_dir = repo_root / "dist"
+    wheel_path, wheel_name, version = find_wheel_and_version(dist_dir)
+
+    click.echo(f"Found wheel: {wheel_name}")
+    click.echo(f"Using version: {version}")
+
+    # Prepare output directory
+    output_dir = repo_root / output
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    click.echo("Preparing plugin directory...")
+
+    # Copy wheel
+    shutil.copy(wheel_path, output_dir / wheel_name)
+
+    # Render manifest
+    click.echo(f"Rendering manifest.json with version {version}...")
+    render_manifest(output_dir / "manifest.json", version)
+
+    # Template paths
+    plugin_dir = repo_root / PLUGIN_DIR
+
+    # Render bash script
+    click.echo("Rendering shell scripts...")
+    render_bash_script(
+        plugin_dir / "dr-apps.sh", output_dir / "dr-apps.sh", version, wheel_name
+    )
+
+    # Render PowerShell script
+    render_powershell_script(
+        plugin_dir / "dr-apps.ps1", output_dir / "dr-apps.ps1", version, wheel_name
+    )
+
+    click.secho(f"✅ CLI plugin prepared in {output}/", fg="green")
+
+
+if __name__ == "__main__":
+    main()

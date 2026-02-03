@@ -10,6 +10,7 @@ import posixpath
 from typing import Callable
 
 import click
+import datarobot as dr
 
 MIMIC_ATTRIBUTES = ['__click_params__', '__name__', '__doc__']
 
@@ -21,7 +22,17 @@ def api_token(command: Callable[..., None]) -> Callable[..., None]:
 
     def wrapper(*args, **kwargs) -> None:
         if not kwargs.get(name):
-            token = os.environ.get('DATAROBOT_API_TOKEN')
+            token = None
+
+            try:
+                client = dr.Client()
+                token = client.token
+            except Exception:
+                pass
+
+            if not token:
+                token = os.environ.get('DATAROBOT_API_TOKEN')
+
             if not token:
                 raise click.MissingParameter(
                     'You need to set DR API token through parameters or DATAROBOT_API_TOKEN env variable.',
@@ -46,8 +57,18 @@ def api_endpoint(command: Callable[..., None]) -> Callable[..., None]:
 
     def wrapper(*args, **kwargs) -> None:
         if not kwargs.get('endpoint'):
-            dr_host = os.environ.get('DATAROBOT_HOST', 'https://app.datarobot.com')
-            endpoint = os.environ.get('DATAROBOT_ENDPOINT', posixpath.join(dr_host, 'api/v2'))
+            endpoint = None
+
+            try:
+                client = dr.Client()
+                endpoint = client.endpoint
+            except Exception:
+                pass
+
+            if not endpoint:
+                dr_host = os.environ.get('DATAROBOT_HOST', 'https://app.datarobot.com')
+                endpoint = os.environ.get('DATAROBOT_ENDPOINT', posixpath.join(dr_host, 'api/v2'))
+
             kwargs['endpoint'] = endpoint
 
         command(*args, **kwargs)
