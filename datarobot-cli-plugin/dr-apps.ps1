@@ -8,7 +8,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Handle --dr-plugin-manifest flag for CLI integration
 if ($args.Count -gt 0 -and $args[0] -eq "--dr-plugin-manifest") {{
-    Write-Output '{{\"name\":\"{plugin_name}\",\"version\":\"{version}\",\"description\":\"{plugin_description}\"}}'
+    Get-Content "$ScriptDir\manifest.json" -Raw
     exit 0
 }}
 
