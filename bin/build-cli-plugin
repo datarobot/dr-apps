@@ -138,6 +138,14 @@ def main(output):
     # Copy wheel
     shutil.copy(wheel_path, output_dir / wheel_name)
 
+    # Copy license
+    click.echo("Copying license...")
+    license_path = repo_root / "LICENSE.txt"
+    if license_path.exists():
+        shutil.copy(license_path, output_dir / "LICENSE.txt")
+    else:
+        click.secho("Warning: LICENSE.txt not found", fg="yellow", err=True)
+
     # Render manifest
     click.echo(f"Rendering manifest.json with version {version}...")
     render_manifest(output_dir / "manifest.json", version)
