@@ -16,9 +16,7 @@ SCRIPT_DIR="$(cd "$(dirname "${{BASH_SOURCE[0]}}")" && pwd)"
 
 # Handle --dr-plugin-manifest flag for CLI integration
 if [[ "${{1:-}}" == "--dr-plugin-manifest" ]]; then
-    cat << 'EOF'
-{{"name":"{plugin_name}","version":"{version}","description":"{plugin_description}"}}
-EOF
+    cat "$SCRIPT_DIR/manifest.json"
     exit 0
 fi
 
